@@ -2823,6 +2823,11 @@ async function refreshProjectList() {
         const projects = await projectManager.getProjects();
         const list = document.getElementById('project-list');
         
+        if (!list) {
+            console.log('项目列表元素不存在，跳过刷新');
+            return;
+        }
+        
         if (projects.length === 0) {
             list.innerHTML = `
                 <div class="empty-state">
@@ -2831,7 +2836,8 @@ async function refreshProjectList() {
                     <p>点击"创建新项目"开始你的创作之旅</p>
                 </div>
             `;
-            document.getElementById('project-details').style.display = 'none';
+            const details = document.getElementById('project-details');
+            if (details) details.style.display = 'none';
             return;
         }
 
@@ -2918,16 +2924,31 @@ async function loadProjectDetails(projectId) {
         const project = await projectManager.getProject(projectId);
         if (!project) return;
 
-        document.getElementById('detail-title').textContent = project.title;
-        document.getElementById('detail-genre').textContent = project.genre;
-        document.getElementById('detail-style').textContent = project.style;
-        document.getElementById('detail-duration').textContent = project.duration || '-';
-        document.getElementById('detail-episodes').textContent = project.episodes || '-';
-        document.getElementById('detail-status').textContent = getStatusText(project.status);
-        document.getElementById('detail-created').textContent = new Date(project.createdAt).toLocaleString('zh-CN');
-        document.getElementById('detail-updated').textContent = new Date(project.updatedAt).toLocaleString('zh-CN');
+        const detailTitle = document.getElementById('detail-title');
+        const detailGenre = document.getElementById('detail-genre');
+        const detailStyle = document.getElementById('detail-style');
+        const detailDuration = document.getElementById('detail-duration');
+        const detailEpisodes = document.getElementById('detail-episodes');
+        const detailStatus = document.getElementById('detail-status');
+        const detailCreated = document.getElementById('detail-created');
+        const detailUpdated = document.getElementById('detail-updated');
+        const projectDetails = document.getElementById('project-details');
         
-        document.getElementById('project-details').style.display = 'block';
+        if (!detailTitle || !projectDetails) {
+            console.log('项目详情元素不存在，跳过加载');
+            return;
+        }
+
+        detailTitle.textContent = project.title;
+        if (detailGenre) detailGenre.textContent = project.genre;
+        if (detailStyle) detailStyle.textContent = project.style;
+        if (detailDuration) detailDuration.textContent = project.duration || '-';
+        if (detailEpisodes) detailEpisodes.textContent = project.episodes || '-';
+        if (detailStatus) detailStatus.textContent = getStatusText(project.status);
+        if (detailCreated) detailCreated.textContent = new Date(project.createdAt).toLocaleString('zh-CN');
+        if (detailUpdated) detailUpdated.textContent = new Date(project.updatedAt).toLocaleString('zh-CN');
+        
+        projectDetails.style.display = 'block';
         
     } catch (error) {
         showToast('加载项目详情失败: ' + error.message, 'error');
