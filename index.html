@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 短剧创作工作台</title>
+<style>
+:root { --bg: #0f172a; --primary: #6366f1; --text: #f1f5f9; --dim: #94a3b8; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+.header { background: var(--bg); padding: 12px 16px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 12px; }
+.header h1 { font-size: 18px; color: var(--primary); }
+.tabs { display: flex; background: #1e293b; border-bottom: 1px solid #334155; overflow-x: auto; }
+.tab-btn { padding: 10px 14px; background: none; border: none; color: var(--dim); cursor: pointer; white-space: nowrap; font-size: 13px; border-bottom: 2px solid transparent; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-content { display: none; padding: 16px; padding-bottom: 48px; }
+.tab-content.active { display: block; }
+.card { background: #1e293b; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+.card h3 { font-size: 14px; color: var(--primary); margin-bottom: 10px; }
+input, textarea, select { width: 100%; padding: 8px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: var(--text); font-size: 13px; }
+textarea { min-height: 100px; resize: vertical; }
+.btn { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.btn:hover { opacity: 0.9; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.result-box { background: #0f172a; border-radius: 8px; padding: 12px; white-space: pre-wrap; min-height: 60px; font-size: 13px; line-height: 1.7; margin-top: 10px; }
+.status { padding: 6px 16px; background: #1e293b; border-top: 1px solid #334155; font-size: 12px; color: var(--dim); position: fixed; bottom: 0; left: 0; right: 0; }
+.flex { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.flex > * { flex: 1; min-width: 140px; }
+.char-card, .scene-card { background: #0f172a; border-radius: 8px; padding: 12px; border-left: 3px solid var(--primary); }
+.char-card h4 { color: var(--primary); font-size: 14px; }
+.char-card p { color: var(--dim); font-size: 12px; margin-top: 4px; }
+.shot-item { background: #0f172a; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+.shot-item .shot-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.shot-item .shot-type { font-size: 12px; color: var(--primary); }
+.shot-item .shot-scene { font-size: 13px; font-weight: bold; }
+.shot-item .shot-meta { font-size: 11px; color: var(--dim); margin-top: 4px; }
+.shot-item .shot-content { font-size: 12px; margin-top: 4px; }
+.export-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } .tab-btn { padding: 8px 10px; font-size: 12px; } }
+</style>
+</head>
+<body>
+<div class="header"><h1>🎬 AI 短剧创作工作台</h1></div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('outline')">📝 大纲</button>
+  <button class="tab-btn" onclick="switchTab('script')">🎭 剧本</button>
+  <button class="tab-btn" onclick="switchTab('storyboard')">🎬 分镜</button>
+  <button class="tab-btn" onclick="switchTab('characters')">👥 角色</button>
+  <button class="tab-btn" onclick="switchTab('scenes')">🎞️ 场景</button>
+  <button class="tab-btn" onclick="switchTab('export')">📤 导出</button>
+</div>
+<div id="tab-outline" class="tab-content active">
+  <div class="card">
+    <h3>📝 剧本大纲生成</h3>
+    <div class="flex">
+      <div><label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:4px;">类型</label><select id="genre"><option>都市情感</option><option>古风玄幻</option><option>悬疑惊悚</option><option>喜剧</option><option>科幻</option></select></div>
+      <div><label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:4px;">风格</label><select id="style"><option>温暖治愈</option><option>暗黑虐心</option><option>轻松搞笑</option><option>紧张刺激</option></select></div>
+      <div><label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:4px;">时长</label><select id="duration"><option>1分钟</option><option>3分钟</option><option>5分钟</option><option>10分钟</option></select></div>
+    </div>
+    <input id="theme" placeholder="输入短剧主题（如：两个陌生人在咖啡馆意外相识）" style="margin-top:8px;">
+    <div style="margin-top:10px;"><button class="btn" onclick="generateOutline()">🚀 生成大纲</button><button class="btn btn-sm" onclick="document.getElementById('outline-result').textContent=''" style="margin-left:8px;background:#334155;">清空</button></div>
+    <div id="outline-result" class="result-box" style="display:none;margin-top:12px;"></div>
+  </div>
+</div>
+<div id="tab-script" class="tab-content">
+  <div class="card">
+    <h3>🎭 剧本正文生成</h3>
+    <textarea id="script-input" placeholder="在此输入剧本描述或大纲，然后点击生成"></textarea>
+    <div style="margin-top:10px;"><button class="btn" onclick="generateScript()">🚀 生成剧本</button><button class="btn btn-sm" onclick="document.getElementById('script-result').textContent=''" style="margin-left:8px;background:#334155;">清空</button></div>
+    <div id="script-result" class="result-box" style="display:none;margin-top:12px;"></div>
+  </div>
+</div>
+<div id="tab-storyboard" class="tab-content">
+  <div class="card">
+    <h3>🎬 分镜脚本</h3>
+    <div class="flex"><select id="visual-style"><option>电影感</option><option>写真感</option><option>动画感</option></select><select id="aspect-ratio"><option>16:9横屏</option><option>9:16竖屏</option><option>1:1方形</option></select></div>
+    <textarea id="storyboard-input" placeholder="输入剧本内容以生成分镜（选填）" style="margin-top:8px;"></textarea>
+    <div style="margin-top:10px;"><button class="btn" onclick="generateStoryboard()">🚀 生成分镜</button><button class="btn btn-sm" onclick="clearShots()" style="margin-left:8px;background:#334155;">清空</button></div>
+    <div id="shots-container" class="grid" style="margin-top:12px;"></div>
+  </div>
+</div>
+<div id="tab-characters" class="tab-content">
+  <div class="card">
+    <h3>👥 角色库</h3>
+    <div class="flex"><input id="char-name" placeholder="角色名"><input id="char-role" placeholder="定位（主角/配角）"></div>
+    <input id="char-desc" placeholder="角色描述" style="margin-top:8px;">
+    <div style="margin-top:10px;"><button class="btn" onclick="addCharacter()">➕ 添加角色</button></div>
+    <div id="chars-container" class="grid" style="margin-top:12px;"></div>
+  </div>
+</div>
+<div id="tab-scenes" class="tab-content">
+  <div class="card">
+    <h3>🎞️ 场景库</h3>
+    <div class="flex"><input id="scene-name" placeholder="场景名"><select id="scene-type"><option>室内</option><option>室外</option><option>幻想</option></select></div>
+    <textarea id="scene-desc" placeholder="场景描述" style="margin-top:8px;min-height:60px;"></textarea>
+    <div style="margin-top:10px;"><button class="btn" onclick="addScene()">➕ 添加场景</button></div>
+    <div id="scenes-container" class="grid" style="margin-top:12px;"></div>
+  </div>
+</div>
+<div id="tab-export" class="tab-content">
+  <div class="card">
+    <h3>📤 导出与发布</h3>
+    <div class="export-btns">
+      <button class="btn" onclick="exportTxt()">📄 TXT</button>
+      <button class="btn" onclick="exportMd()">📝 MD</button>
+      <button class="btn" onclick="exportJson()">📋 JSON</button>
+      <button class="btn" style="background:#10b981;" onclick="exportCsv()">📊 CSV</button>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;margin-top:8px;">提示：导出前请先在上方标签页生成内容。所有数据保存在浏览器本地。</div>
+  </div>
+</div>
+<div class="status" id="status">就绪 · TVLIB v2.0 极简版</div>
+<script>
+let projectData = { outline: '', script: '', shots: [], characters: [], scenes: [] };
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (event && event.target && event.target.classList) event.target.classList.add('active');
+}
+function generateOutline() {
+  const genre = document.getElementById('genre').value;
+  const style = document.getElementById('style').value;
+  const theme = document.getElementById('theme').value.trim() || '待定主题';
+  const duration = document.getElementById('duration').value;
+  const result = document.getElementById('outline-result');
+  result.style.display = 'block';
+  result.textContent = 'AI构思中...';
+  setTimeout(() => {
+    const outline = `【${theme}】
+类型：${genre} | 风格：${style} | 时长：${duration}
+
+一、核心人物
+1. 主角A：（性格+目标）
+2. 主角B：（性格+目标）
+3. 配角：（作用）
+
+二、主要场景
+1. 场景A：（地点+氛围）
+2. 场景B：（地点+氛围）
+
+三、情节结构
+1. 开端：${theme}的起因
+2. 发展：冲突与转折
+3. 高潮：关键抉择
+4. 结局：情感升华
+
+四、核心冲突
+主要矛盾：
+次要矛盾：
+
+五、情感主线
+核心情感：
+情绪节奏：
+`;
+    result.textContent = outline;
+    projectData.outline = outline;
+    setStatus('大纲已生成 · ' + outline.length + ' 字');
+  }, 800);
+}
+function generateScript() {
+  const result = document.getElementById('script-result');
+  result.style.display = 'block';
+  result.textContent = 'AI创作中...';
+  setTimeout(() => {
+    const script = `【未定名短剧】
+
+第一场
+场景：咖啡馆内景 白天
+人物：主角A、主角B
+
+[主角A独自坐在角落，手持咖啡，神情忧郁]
+
+主角A：（独白）
+今天又是平凡的一天...
+
+主角B：（走近）
+这里有人吗？
+
+主角A：请便。
+
+[主角B坐下，两人目光交汇]
+
+主角A：（轻声）
+也许这就是缘分。
+
+—— 第一场 完 ——
+
+第二场
+（继续发展剧情...）
+`;
+    result.textContent = script;
+    projectData.script = script;
+    setStatus('剧本已生成 · ' + script.length + ' 字');
+  }, 1000);
+}
+function generateStoryboard() {
+  const container = document.getElementById('shots-container');
+  container.innerHTML = '';
+  const moods = ['平静', '紧张', '浪漫', '悬疑', '温馨'];
+  const types = ['远景', '全景', '中景', '近景', '特写'];
+  const cameras = ['固定', '推镜', '拉镜', '摇镜'];
+  const lights = ['自然光', '暖光', '冷光', '聚光'];
+  const shots = [];
+  for (let i = 1; i <= 4; i++) {
+    const mood = moods[Math.floor(Math.random() * moods.length)];
+    shots.push({ id: i, type: types[Math.floor(Math.random() * types.length)], scene: '场景' + i, camera: cameras[Math.floor(Math.random() * cameras.length)], mood, lighting: lights[Math.floor(Math.random() * lights.length)], content: '画面内容描述...', prompt: 'cinematic, ' + mood });
+  }
+  projectData.shots = shots;
+  shots.forEach(s => {
+    container.innerHTML += `<div class="shot-item"><div class="shot-header"><span class="shot-type">🎬 ${s.type}</span><span class="shot-type">${s.id}/${shots.length}</span></div><div class="shot-scene">${s.scene}</div><div class="shot-meta">运镜:${s.camera} | 打光:${s.lighting} | 情绪:${s.mood}</div><div class="shot-content">${s.content}</div><div style="font-size:11px;color:#6366f1;margin-top:4px;">AI提示词: ${s.prompt}</div></div>`;
+  });
+  setStatus('分镜已生成 · ' + shots.length + ' 个镜头');
+}
+function clearShots() { document.getElementById('shots-container').innerHTML = ''; projectData.shots = []; setStatus('分镜已清空'); }
+function addCharacter() {
+  const name = document.getElementById('char-name').value.trim(), role = document.getElementById('char-role').value.trim(), desc = document.getElementById('char-desc').value.trim();
+  if (!name) { alert('请输入角色名'); return; }
+  projectData.characters.push({ id: Date.now(), name, role, desc });
+  document.getElementById('chars-container').innerHTML += `<div class="char-card"><h4>👤 ${name}</h4><p>📌 ${role || '未填写'}</p><p>${desc || '暂无描述'}</p></div>`;
+  document.getElementById('char-name').value = ''; document.getElementById('char-role').value = ''; document.getElementById('char-desc').value = '';
+  setStatus('已添加角色: ' + name);
+}
+function addScene() {
+  const name = document.getElementById('scene-name').value.trim(), type = document.getElementById('scene-type').value, desc = document.getElementById('scene-desc').value.trim();
+  if (!name) { alert('请输入场景名'); return; }
+  projectData.scenes.push({ id: Date.now(), name, type, desc });
+  document.getElementById('scenes-container').innerHTML += `<div class="scene-card"><h4>🎬 ${name}</h4><p>类型: ${type}</p><p>${desc || '暂无描述'}</p></div>`;
+  document.getElementById('scene-name').value = ''; document.getElementById('scene-desc').value = '';
+  setStatus('已添加场景: ' + name);
+}
+function download(content, filename, type) { const blob = new Blob([content], { type }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url); }
+function exportTxt() {
+  let txt = 'AI短剧创作工作台 - 剧本导出\n' + '='.repeat(30) + '\n\n';
+  if (projectData.outline) txt += '【大纲】\n' + projectData.outline + '\n\n';
+  if (projectData.script) txt += '【剧本】\n' + projectData.script + '\n\n';
+  if (projectData.shots.length) { txt += '【分镜】\n'; projectData.shots.forEach(s => { txt += '[' + s.id + '] ' + s.type + ' | ' + s.scene + ' | ' + s.camera + '\n内容: ' + s.content + '\n'; }); }
+  download(txt, '短剧剧本.txt', 'text/plain;charset=utf-8');
+  setStatus('已导出 TXT');
+}
+function exportMd() {
+  let md = '# AI短剧创作工作台\n\n';
+  if (projectData.outline) md += '## 大纲\n\n' + projectData.outline + '\n\n';
+  if (projectData.script) md += '## 剧本\n\n' + projectData.script + '\n\n';
+  if (projectData.shots.length) { md += '## 分镜\n\n| 序号 | 镜位 | 场景 | 运镜 | 描述 |\n|:--|:--|:--|:--|:--|\n'; projectData.shots.forEach(s => { md += '| ' + s.id + ' | ' + s.type + ' | ' + s.scene + ' | ' + s.camera + ' | ' + s.content + ' |\n'; }); }
+  download(md, '短剧剧本.md', 'text/markdown;charset=utf-8');
+  setStatus('已导出 Markdown');
+}
+function exportJson() { download(JSON.stringify(projectData, null, 2), '短剧项目.json', 'application/json'); setStatus('已导出 JSON'); }
+function exportCsv() {
+  if (!projectData.shots.length) { alert('请先生成分镜'); return; }
+  let csv = '序号,镜位,场景,运镜,情绪,打光,内容\n';
+  projectData.shots.forEach(s => { csv += s.id + ',' + s.type + ',' + s.scene + ',' + s.camera + ',' + s.mood + ',' + s.lighting + ',"' + s.content + '"\n'; });
+  download(csv, '分镜.csv', 'text/csv;charset=utf-8');
+  setStatus('已导出 CSV');
+}
+function setStatus(text) { const el = document.getElementById('status'); if (el) el.textContent = text; }
+</script>
+</body>
+</html>
