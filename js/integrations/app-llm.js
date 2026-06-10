@@ -216,17 +216,17 @@
       icon: '🔵',
       free: true,
       requiresKey: true,
-      defaultModel: 'qwen-2.5-72b',
-      description: '阿里达摩院千问，支持本地部署',
-      setup: '获取 API Key: dashscope.aliyun.com',
+      defaultModel: 'qwen-plus',
+      description: '阿里达摩院千问，中文能力强',
+      setup: '获取 API Key: dashscope.aliyun.com → 开通灵积模型服务',
       color: '#3b82f6',
       docs: [
-        { label: 'Qwen 2.5 72B', model: 'qwen-2.5-72b', desc: '最强版本，推荐首选' },
-        { label: 'Qwen 2.5 14B', model: 'qwen-2.5-14b', desc: '平衡速度与质量' },
-        { label: 'Qwen 2.5 7B', model: 'qwen-2.5-7b', desc: '轻量快速' },
-        { label: 'Qwen 2', model: 'qwen-2', desc: '稳定版本' }
+        { label: 'Qwen-Plus', model: 'qwen-plus', desc: '推荐首选，性价比高' },
+        { label: 'Qwen-Turbo', model: 'qwen-turbo', desc: '快速响应，适合高频调用' },
+        { label: 'Qwen-Max', model: 'qwen-max', desc: '最强版本，复杂任务' },
+        { label: 'Qwen-Long', model: 'qwen-long', desc: '超长上下文，10万字+' }
       ],
-      apiBase: () => localStorage.getItem('llm_qwen_host') || 'https://dashscope.aliyuncs.com/api/text/v1',
+      apiBase: () => localStorage.getItem('llm_qwen_host') || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
       buildRequest: (model, messages) => ({
         url: () => `${PROVIDERS.qwen.apiBase()}/chat/completions`,
         method: 'POST',
