@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="专业级AI短剧剧本创作系统 - 包含剧本大纲、剧本编写、分镜脚本、角色库、场景库、节拍表、AI建议引擎等完整功能，支持Android手机和Windows电脑使用">
+    <meta name="keywords" content="短剧,剧本,分镜,AI创作,短视频,微电影,影视剧本,编剧工具,角色设计,故事板">
+    <meta name="author" content="AI Drama Workshop">
+
+    <!-- ==================== PWA 核心元标签 ==================== -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="color-scheme" content="dark light">
+
+    <!-- ==================== 桌面 PWA (Windows) ==================== -->
+    <meta name="application-name" content="AI短剧创作工作台">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="短剧创作">
+    <meta name="apple-mobile-web-app-orientation" content="any">
+
+    <!-- ==================== 安卓 Chrome 专用 ==================== -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="MobileOptimized" content="width">
+    <meta name="HandheldFriendly" content="true">
+
+    <!-- ==================== iOS 图标 ==================== -->
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.svg">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.svg">
+
+    <!-- ==================== 通用图标 ==================== -->
+    <link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="icons/icon-96.svg">
+    <link rel="icon" type="image/svg+xml" sizes="128x128" href="icons/icon-128.svg">
+    <link rel="icon" type="image/svg+xml" sizes="192x192" href="icons/icon-192.svg">
+    <link rel="icon" type="image/svg+xml" sizes="512x512" href="icons/icon-512.svg">
+
+    <!-- ==================== Windows 磁贴图标 ==================== -->
+    <meta name="msapplication-TileColor" content="#7c3aed">
+    <meta name="msapplication-TileImage" content="icons/icon-144.svg">
+    <meta name="msapplication-config" content="none">
+
+    <!-- ==================== PWA 安装提示与启动画面 ==================== -->
+    <meta name="apple-touch-startup-image" content="icons/icon-512.svg">
+
+    <!-- ==================== 防止 iOS 电话号码识别 ==================== -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="address=no">
+    <meta name="format-detection" content="email=no">
+
+    <!-- ==================== 内容安全策略 ==================== -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; connect-src 'self' http: https: ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self' blob:; frame-src 'self' blob:">
+
+    <!-- ==================== 性能与缓存 ==================== -->
+    <meta http-equiv="Cache-Control" content="public, max-age=3600, must-revalidate">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+    <!-- ==================== 打开方式优化 ==================== -->
+    <meta name="target-densitydpi" content="device-dpi">
+    <meta name="apple-mobile-web-app-orientation" content="landscape">
+
+    <title>AI短剧创作工作台</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ==================== 首次使用引导弹窗 ==================== -->
+    <div id="onboarding-modal" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div class="modal-content onboarding-modal">
+            <div class="onboarding-header">
+                <div class="onboarding-icon">👋</div>
+                <h2>欢迎使用 AI短剧文本制作工作流</h2>
+                <p>让我们带你快速了解这个专业级短剧创作工具</p>
+            </div>
+            
+            <div class="onboarding-steps">
+                <div class="onboarding-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>📂 创建项目</h3>
+                        <p>首先创建一个新项目，设置好类型和风格</p>
+                    </div>
+                </div>
+                <div class="onboarding-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>📝 编写大纲</h3>
+                        <p>设计剧本大纲，确定故事主线和关键情节点</p>
+                    </div>
+                </div>
+                <div class="onboarding-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>🎬 生成分镜</h3>
+                        <p>将剧本转化为专业分镜脚本，包含AI提示词</p>
+                    </div>
+                </div>
+                <div class="onboarding-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>🖼️ 故事板</h3>
+                        <p>可视化预览故事板，支持多种布局模式</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="onboarding-actions">
+                <button class="btn btn-outline" onclick="closeOnboarding()">跳过</button>
+                <button class="btn btn-primary" id="onboarding-next" onclick="nextOnboardingStep()">开始创建项目 →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 主应用容器（三栏布局） ==================== -->
+    <div class="app-container">
+        
+        <!-- ========== 顶部标题栏 ========== -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="logo">
+                    <span class="logo-icon">🎬</span>
+                    <h1>AI短剧工作流</h1>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <!-- 创作流程进度指示器 -->
+                <div class="workflow-progress" id="workflow-progress">
+                    <div class="progress-step active" data-step="1" onclick="jumpToStep(1)">
+                        <div class="step-dot">1</div>
+                        <span>大纲</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="2" onclick="jumpToStep(2)">
+                        <div class="step-dot">2</div>
+                        <span>剧本</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="3" onclick="jumpToStep(3)">
+                        <div class="step-dot">3</div>
+                        <span>分镜</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="4" onclick="jumpToStep(4)">
+                        <div class="step-dot">4</div>
+                        <span>导出</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <!-- 保存状态 -->
+                <div class="save-status" id="save-status">
+                    <span class="save-indicator saving" style="display: none;">🔄 保存中...</span>
+                    <span class="save-indicator saved">✓ 已保存</span>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="showTemplates()">📚 模板库</button>
+                <button class="btn btn-secondary" onclick="showKeyboardShortcuts()">⌨️ 快捷键</button>
+                <button class="btn btn-primary" onclick="analyzeIssues()">🔍 分析</button>
+            </div>
+        </header>
+
+        <!-- ========== 三栏主体区域 ========== -->
+        <div class="app-main">
+            
+            <!-- ========== 左侧边栏：项目导航 ========== -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-header">
+                        <h3>📂 当前项目</h3>
+                        <button class="btn-icon" onclick="createNewProject()" title="新建项目">+</button>
+                    </div>
+                    <div class="project-selector" id="current-project-name">
+                        <span class="project-name-text">未选择项目</span>
+                        <span class="project-status draft">草稿</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">🎯 创作流程</h4>
+                    <nav class="sidebar-nav">
+                        <a class="nav-item active" data-tab="outline" onclick="switchTab('outline')">
+                            <span class="nav-icon">📝</span>
+                            <span class="nav-text">剧本大纲</span>
+                            <span class="nav-status" id="status-outline">○</span>
+                        </a>
+                        <a class="nav-item" data-tab="script" onclick="switchTab('script')">
+                            <span class="nav-icon">🎭</span>
+                            <span class="nav-text">剧本生成</span>
+                            <span class="nav-status" id="status-script">○</span>
+                        </a>
+                        <a class="nav-item" data-tab="novel" onclick="switchTab('novel')">
+                            <span class="nav-icon">📖</span>
+                            <span class="nav-text">小说生成</span>
+                            <span class="nav-status" id="status-novel">○</span>
+                        </a>
+                        <a class="nav-item" data-tab="storyboard" onclick="switchTab('storyboard')">
+                            <span class="nav-icon">🎞️</span>
+                            <span class="nav-text">分镜脚本</span>
+                            <span class="nav-status" id="status-storyboard">○</span>
+                        </a>
+                        <a class="nav-item" data-tab="board" onclick="switchTab('board')">
+                            <span class="nav-icon">🖼️</span>
+                            <span class="nav-text">故事板</span>
+                            <span class="nav-status" id="status-board">○</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">🗂️ 项目资源</h4>
+                    <nav class="sidebar-nav">
+                        <a class="nav-item" data-tab="characters" onclick="switchTab('characters')">
+                            <span class="nav-icon">👥</span>
+                            <span class="nav-text">角色库</span>
+                            <span class="nav-badge" id="char-count">0</span>
+                        </a>
+                        <a class="nav-item" data-tab="scenes" onclick="switchTab('scenes')">
+                            <span class="nav-icon">🎬</span>
+                            <span class="nav-text">场景库</span>
+                            <span class="nav-badge" id="scene-count">0</span>
+                        </a>
+                        <a class="nav-item" data-tab="beats" onclick="switchTab('beats')">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">节拍表</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">⚙️ 工具</h4>
+                    <nav class="sidebar-nav">
+                        <a class="nav-item" onclick="showProjectSettings()">
+                            <span class="nav-icon">⚙️</span>
+                            <span class="nav-text">项目设置</span>
+                        </a>
+                        <a class="nav-item" onclick="showVersionHistory()">
+                            <span class="nav-icon">📜</span>
+                            <span class="nav-text">版本历史</span>
+                        </a>
+                        <a class="nav-item" onclick="showExportPanel()">
+                            <span class="nav-icon">📤</span>
+                            <span class="nav-text">导出下载</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <button class="btn btn-outline btn-block" onclick="saveProject()">💾 保存项目</button>
+                    <button class="btn btn-outline btn-block" onclick="loadProject()">📂 加载项目</button>
+                </div>
+            </aside>
+
+            <!-- ========== 中间主内容区 ========== -->
+            <main class="main-content">
+                
+                <!-- 剧本大纲模块 -->
+                <section id="tab-outline" class="tab-content active">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">📝 第一步：剧本大纲设计</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-sm" onclick="loadTemplate('outline')">📋 模板</button>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>短剧类型</label>
+                                <select id="genre">
+                                    <option value="都市情感">都市情感</option>
+                                    <option value="古装仙侠">古装仙侠</option>
+                                    <option value="悬疑推理">悬疑推理</option>
+                                    <option value="喜剧搞笑">喜剧搞笑</option>
+                                    <option value="励志成长">励志成长</option>
+                                    <option value="科幻奇幻">科幻奇幻</option>
+                                    <option value="豪门恩怨">豪门恩怨</option>
+                                    <option value="青春校园">青春校园</option>
+                                    <option value="穿越重生">穿越重生</option>
+                                    <option value="家庭伦理">家庭伦理</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>时长（分钟）</label>
+                                <input type="text" id="duration" placeholder="如：10分钟">
+                            </div>
+                            <div class="form-group">
+                                <label>风格</label>
+                                <select id="style">
+                                    <option value="写实">写实</option>
+                                    <option value="浪漫">浪漫</option>
+                                    <option value="文艺">文艺</option>
+                                    <option value="轻松">轻松</option>
+                                    <option value="暗黑">暗黑</option>
+                                    <option value="奇幻">奇幻</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>集数</label>
+                                <input type="text" id="episodes" placeholder="如：12集">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>核心主题 / 故事简介</label>
+                            <textarea id="theme" rows="4" placeholder="请描述故事的核心主题、主要情节和情感走向..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>主要角色设定（每行一个）</label>
+                            <textarea id="characters" rows="3" placeholder="如：张三 - 28岁，霸道总裁，外冷内热&#10;李四 - 25岁，职场新人，善良坚强"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>情节节点（起承转合）</label>
+                            <div class="plot-nodes">
+                                <div class="plot-node">
+                                    <span class="node-label">起</span>
+                                    <textarea id="plot-start" rows="2" placeholder="故事开端，建置人物和世界观"></textarea>
+                                </div>
+                                <div class="plot-node">
+                                    <span class="node-label">承</span>
+                                    <textarea id="plot-develop" rows="2" placeholder="情节发展，冲突渐起"></textarea>
+                                </div>
+                                <div class="plot-node">
+                                    <span class="node-label">转</span>
+                                    <textarea id="plot-twist" rows="2" placeholder="关键转折，高潮来临"></textarea>
+                                </div>
+                                <div class="plot-node">
+                                    <span class="node-label">合</span>
+                                    <textarea id="plot-end" rows="2" placeholder="结局收尾，情感升华"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="btn btn-primary btn-large" id="btn-generate-outline" onclick="generateOutline()">
+                                <span class="btn-text">✨ AI生成完整大纲</span>
+                                <span class="btn-loading" style="display: none;">🤖 生成中...</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="optimizeOutline()">🔧 优化大纲</button>
+                        </div>
+
+                        <div class="result-area" id="outline-result" style="display:none;">
+                            <div class="result-header">
+                                <h3>📋 剧本大纲</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn-sm" onclick="editContent('outline-result-content')">✏️ 修改</button>
+                                    <button class="btn btn-sm" onclick="copyContent('outline-result-content')">📋 复制</button>
+                                    <button class="btn btn-sm" onclick="continueToScript()">继续写剧本 →</button>
+                                </div>
+                            </div>
+                            <div class="result-content" id="outline-result-content" contenteditable="false"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 剧本生成模块 -->
+                <section id="tab-script" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">🎭 第二步：剧本生成</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-sm" onclick="loadTemplate('script')">📋 模板</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>基于大纲生成剧本</label>
+                            <textarea id="script-input" rows="6" placeholder="将大纲内容粘贴至此，或直接编写你的故事梗概..."></textarea>
+                            <button class="btn btn-outline btn-sm" onclick="importOutline()">⬅️ 从大纲导入</button>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>剧本格式</label>
+                                <select id="script-format">
+                                    <option value="standard">标准剧本格式</option>
+                                    <option value="dialogue">对白为主</option>
+                                    <option value="action">动作描写为主</option>
+                                    <option value="mixed">混合格式</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>语言风格</label>
+                                <select id="script-style">
+                                    <option value="modern">现代口语</option>
+                                    <option value="classical">古典优雅</option>
+                                    <option value="simple">简洁明快</option>
+                                    <option value="literary">文学文艺</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>场景数量</label>
+                            <div class="range-input">
+                                <input type="range" id="scene-count-range" min="3" max="30" value="12">
+                                <span id="scene-count-value">12</span> 场
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="btn btn-primary btn-large" id="btn-generate-script" onclick="generateScript()">
+                                <span class="btn-text">🎬 AI生成剧本</span>
+                                <span class="btn-loading" style="display: none;">🤖 生成中...</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="optimizeScript()">🔧 润色剧本</button>
+                        </div>
+
+                        <div class="result-area" id="script-result" style="display:none;">
+                            <div class="result-header">
+                                <h3>🎭 剧本正文</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn-sm" onclick="editContent('script-result-content')">✏️ 修改</button>
+                                    <button class="btn btn-sm" onclick="copyContent('script-result-content')">📋 复制</button>
+                                    <button class="btn btn-sm" onclick="continueToStoryboard()">继续生成分镜 →</button>
+                                </div>
+                            </div>
+                            <div class="result-content script-content" id="script-result-content" contenteditable="false"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 小说生成模块 -->
+                <section id="tab-novel" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">📖 小说生成（可选）</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-sm" onclick="loadTemplate('novel')">📋 模板</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>小说背景设定</label>
+                            <textarea id="novel-input" rows="4" placeholder="输入小说背景、人物关系或情节大纲..."></textarea>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>叙事视角</label>
+                                <select id="narrative-pov">
+                                    <option value="first">第一人称（我）</option>
+                                    <option value="third-limited">第三人称限知</option>
+                                    <option value="third-omni">第三人称全知</option>
+                                    <option value="multiple">多视角交替</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>章节数量</label>
+                                <input type="number" id="chapter-count" value="5" min="1" max="30">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>文笔风格</label>
+                            <select id="novel-style">
+                                <option value="vivid">细腻生动</option>
+                                <option value="simple">简洁明快</option>
+                                <option value="elegant">典雅优美</option>
+                                <option value="humorous">幽默风趣</option>
+                            </select>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="btn btn-primary btn-large" id="btn-generate-novel" onclick="generateNovel()">
+                                <span class="btn-text">📖 AI生成小说</span>
+                                <span class="btn-loading" style="display: none;">🤖 生成中...</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="optimizeNovel()">🔧 润色优化</button>
+                        </div>
+
+                        <div class="result-area" id="novel-result" style="display:none;">
+                            <div class="result-header">
+                                <h3>📖 小说内容</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn-sm" onclick="editContent('novel-result-content')">✏️ 修改</button>
+                                    <button class="btn btn-sm" onclick="copyContent('novel-result-content')">📋 复制</button>
+                                </div>
+                            </div>
+                            <div class="result-content novel-content" id="novel-result-content" contenteditable="false"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 分镜脚本模块 -->
+                <section id="tab-storyboard" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">🎞️ 第三步：分镜脚本生成</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-sm" onclick="loadTemplate('storyboard')">📋 模板</button>
+                                <button class="btn btn-sm" onclick="optimizeAllPrompts()">✨ 优化提示词</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>分镜场景描述</label>
+                            <textarea id="storyboard-input" rows="4" placeholder="描述需要转化为分镜的场景，或导入剧本..."></textarea>
+                            <button class="btn btn-outline btn-sm" onclick="importFromScript()">⬅️ 从剧本导入</button>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label>镜头风格</label>
+                                <select id="shot-style">
+                                    <option value="cinematic">电影感</option>
+                                    <option value="dynamic">动感十足</option>
+                                    <option value="calm">沉稳叙事</option>
+                                    <option value="artistic">艺术风格</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>画面比例</label>
+                                <select id="aspect-ratio">
+                                    <option value="16:9">16:9 横屏</option>
+                                    <option value="9:16">9:16 竖屏</option>
+                                    <option value="1:1">1:1 方形</option>
+                                    <option value="4:3">4:3 经典</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <button class="btn btn-primary btn-large" id="btn-generate-storyboard" onclick="generateStoryboard()">
+                                <span class="btn-text">🎞️ AI生成分镜脚本</span>
+                                <span class="btn-loading" style="display: none;">🤖 生成中...</span>
+                            </button>
+                        </div>
+
+                        <!-- 分镜列表区域 -->
+                        <div id="shots-container" style="display:none;">
+                            <div class="result-header">
+                                <h3>🎞️ 分镜脚本</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn-sm" onclick="addShotManually()">+ 添加分镜</button>
+                                    <button class="btn btn-sm" onclick="regenerateStoryboard()">🔄 重新生成</button>
+                                    <button class="btn btn-sm" onclick="detectDuplicateShots()">🔍 检测重复</button>
+                                    <button class="btn btn-sm" onclick="optimizeStoryboardWithBigData()">🌐 大数据优化</button>
+                                </div>
+                            </div>
+                            <div id="shots-list" class="shots-grid"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 故事板可视化模块 -->
+                <section id="tab-board" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">🖼️ 第四步：故事板可视化</h2>
+                        </div>
+
+                        <!-- 模板选择器 -->
+                        <div class="template-grid">
+                            <div class="template-card" onclick="loadTemplateToBoard('yuji_sword_dance')">
+                                <span class="template-icon">🎭</span>
+                                <h4>虞姬舞剑·手绘分镜</h4>
+                                <p>4×3布局 · 12镜头 · 古装戏曲</p>
+                            </div>
+                            <div class="template-card" onclick="loadTemplateToBoard('office_daily')">
+                                <span class="template-icon">💼</span>
+                                <h4>办公室日常·调度分镜</h4>
+                                <p>3×2布局 · 6镜头 · 职场日常</p>
+                            </div>
+                            <div class="template-card" onclick="loadTemplateToBoard('office_romance')">
+                                <span class="template-icon">💕</span>
+                                <h4>职场相遇·爱情分镜</h4>
+                                <p>3×2布局 · 6镜头 · 都市情感</p>
+                            </div>
+                            <div class="template-card" onclick="loadTemplateToBoard('bamboo_duel')">
+                                <span class="template-icon">⚔️</span>
+                                <h4>竹林对决·动作分镜</h4>
+                                <p>4×3布局 · 12镜头 · 武侠动作</p>
+                            </div>
+                        </div>
+
+                        <div class="board-controls">
+                            <div class="control-group">
+                                <label>展示模式：</label>
+                                <select id="board-view-mode" onchange="renderStoryboard()">
+                                    <option value="grid">网格视图</option>
+                                    <option value="timeline">时间线视图</option>
+                                    <option value="carousel">轮播视图</option>
+                                    <option value="4x3">4×3布局</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>每行显示：</label>
+                                <select id="board-columns" onchange="renderStoryboard()">
+                                    <option value="2">2列</option>
+                                    <option value="3" selected>3列</option>
+                                    <option value="4">4列</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-outline" onclick="refreshStoryboard()">🔄 刷新故事板</button>
+                            <button class="btn btn-outline" onclick="exportStoryboard()">📥 导出</button>
+                        </div>
+
+                        <div id="board-view" class="board-container"></div>
+                    </div>
+                </section>
+
+                <!-- 角色库模块 -->
+                <section id="tab-characters" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">👥 角色库</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-sm btn-primary" onclick="addCharacter()">+ 添加角色</button>
+                            </div>
+                        </div>
+                        <div id="characters-list" class="characters-grid">
+                            <div class="empty-state">
+                                <div class="empty-icon">👥</div>
+                                <h3>暂无角色</h3>
+                                <p>添加角色以开始构建你的故事世界</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 场景库模块 -->
+                <section id="tab-scenes" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">🎬 场景库</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-sm btn-primary" onclick="addScene()">+ 添加场景</button>
+                            </div>
+                        </div>
+                        <div id="scenes-list" class="scenes-grid">
+                            <div class="empty-state">
+                                <div class="empty-icon">🎬</div>
+                                <h3>暂无场景</h3>
+                                <p>添加场景以丰富你的故事世界</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 节拍表模块 -->
+                <section id="tab-beats" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">📊 节拍表</h2>
+                            <div class="panel-actions">
+                                <select id="beat-structure" onchange="changeBeatStructure()">
+                                    <option value="three-act">三幕结构</option>
+                                    <option value="save-the-cat">Save The Cat (15节拍)</option>
+                                    <option value="four-act">四幕结构</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="beat-table" class="beat-table">
+                            <!-- 节拍表内容将由JS动态生成 -->
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- ========== 右侧属性面板 ========== -->
+            <aside class="properties-panel" id="properties-panel">
+                <div class="panel-header">
+                    <h3>📌 属性面板</h3>
+                    <button class="btn-icon" onclick="togglePropertiesPanel()">×</button>
+                </div>
+
+                <!-- 项目统计 -->
+                <div class="properties-section" id="project-stats">
+                    <h4>项目统计</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">大纲</span>
+                            <span class="stat-value" id="stat-outline">0 字</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">剧本</span>
+                            <span class="stat-value" id="stat-script">0 字</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">分镜</span>
+                            <span class="stat-value" id="stat-shots">0 个</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">时长</span>
+                            <span class="stat-value" id="stat-duration">0秒</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI 提示词助手 -->
+                <div class="properties-section" id="prompt-assistant">
+                    <h4>✨ AI 提示词助手</h4>
+                    <div class="form-group">
+                        <label>场景类型</label>
+                        <select id="prompt-scene-type" onchange="updatePromptPreview()">
+                            <option value="office_day">现代办公室（日）</option>
+                            <option value="cafe_day">咖啡馆（日）</option>
+                            <option value="street_night">街道夜景</option>
+                            <option value="palace_hall">古代皇宫</option>
+                            <option value="bamboo_forest">竹林</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>情绪基调</label>
+                        <select id="prompt-mood" onchange="updatePromptPreview()">
+                            <option value="romantic">浪漫</option>
+                            <option value="tense">紧张</option>
+                            <option value="sad">悲伤</option>
+                            <option value="dramatic">戏剧性</option>
+                            <option value="mysterious">神秘</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>生成提示词</label>
+                        <textarea id="prompt-preview" rows="6" readonly placeholder="选择场景和情绪后自动生成..."></textarea>
+                        <button class="btn btn-sm btn-outline" onclick="copyPrompt()">📋 复制</button>
+                    </div>
+                </div>
+
+                <!-- 快捷操作 -->
+                <div class="properties-section">
+                    <h4>⚡ 快捷操作</h4>
+                    <div class="quick-actions">
+                        <button class="btn btn-sm btn-block" onclick="generateAll()">🚀 一键生成全部</button>
+                        <button class="btn btn-sm btn-block" onclick="clearAll()">🗑️ 清空所有内容</button>
+                        <button class="btn btn-sm btn-block" onclick="showExportPanel()">📥 导出项目</button>
+                    </div>
+                </div>
+
+                <!-- 快捷键提示 -->
+                <div class="properties-section">
+                    <h4>⌨️ 常用快捷键</h4>
+                    <div class="shortcuts-list">
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>S</kbd> 保存</div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd> 撤销</div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>K</kbd> 搜索</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- ========== 底部状态栏 ========== -->
+        <footer class="app-footer">
+            <div class="footer-left">
+                <span id="project-status-bar">未选择项目</span>
+            </div>
+            <div class="footer-center">
+                <span id="cursor-position"></span>
+            </div>
+            <div class="footer-right">
+                <span id="word-count">字数: 0</span>
+                <span class="separator">|</span>
+                <span id="shot-count-stat">分镜: 0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== 弹窗组件 ==================== -->
+    
+    <!-- 创建项目弹窗 -->
+    <div id="create-project-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ 创建新项目</h3>
+                <button class="btn-icon modal-close" onclick="closeCreateModal()">×</button>
+            </div>
+            <form id="create-project-form">
+                <div class="form-group">
+                    <label>项目名称 *</label>
+                    <input type="text" id="new-project-title" required placeholder="请输入项目名称">
+                </div>
+                <div class="form-group">
+                    <label>项目描述</label>
+                    <textarea id="new-project-desc" rows="2" placeholder="请输入项目描述"></textarea>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select id="new-project-genre">
+                            <option value="都市情感">都市情感</option>
+                            <option value="古装仙侠">古装仙侠</option>
+                            <option value="悬疑推理">悬疑推理</option>
+                            <option value="喜剧搞笑">喜剧搞笑</option>
+                            <option value="励志成长">励志成长</option>
+                            <option value="青春校园">青春校园</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>风格</label>
+                        <select id="new-project-style">
+                            <option value="写实">写实</option>
+                            <option value="浪漫">浪漫</option>
+                            <option value="文艺">文艺</option>
+                            <option value="轻松">轻松</option>
+                            <option value="暗黑">暗黑</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>预计时长</label>
+                        <input type="text" id="new-project-duration" placeholder="如：10分钟">
+                    </div>
+                    <div class="form-group">
+                        <label>集数</label>
+                        <input type="text" id="new-project-episodes" placeholder="如：12集">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeCreateModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">创建项目</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 历史记录弹窗 -->
+    <div id="history-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📜 创作历史记录</h3>
+                <button class="btn-icon modal-close" onclick="closeHistoryModal()">×</button>
+            </div>
+            <div id="history-list" class="modal-body">
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <p>暂无操作记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版本管理弹窗 -->
+    <div id="version-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📌 版本管理</h3>
+                <button class="btn-icon modal-close" onclick="closeVersionModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>版本名称</label>
+                    <input type="text" id="version-name" placeholder="如：V1.0 初稿">
+                </div>
+                <button class="btn btn-primary" onclick="saveVersion()">保存版本</button>
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+                <div id="version-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷键帮助弹窗 -->
+    <div id="shortcuts-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⌨️ 快捷键帮助</h3>
+                <button class="btn-icon modal-close" onclick="closeShortcutsModal()">×</button>
+            </div>
+            <div class="modal-body shortcuts-grid">
+                <div class="shortcut-group">
+                    <h4>通用</h4>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>S</kbd> 保存项目</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>N</kbd> 新建项目</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>K</kbd> 快速搜索</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>?</kbd> 显示帮助</div>
+                </div>
+                <div class="shortcut-group">
+                    <h4>编辑</h4>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd> 撤销</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> 重做</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>C</kbd> 复制</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>V</kbd> 粘贴</div>
+                </div>
+                <div class="shortcut-group">
+                    <h4>导航</h4>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>1</kbd> 大纲</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>2</kbd> 剧本</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>3</kbd> 分镜</div>
+                    <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>4</kbd> 故事板</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分镜编辑弹窗 -->
+    <div id="shot-edit-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>🎬 编辑分镜</h3>
+                <button class="btn-icon modal-close" onclick="closeShotEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="shot-edit-form">
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label>镜别</label>
+                            <select id="edit-shot-type"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>运镜</label>
+                            <select id="edit-shot-camera"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>时长</label>
+                            <input type="text" id="edit-shot-duration" placeholder="如：5s">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>场景</label>
+                        <input type="text" id="edit-shot-scene" placeholder="场景描述">
+                    </div>
+                    <div class="form-group">
+                        <label>人物</label>
+                        <input type="text" id="edit-shot-characters" placeholder="出现的人物">
+                    </div>
+                    <div class="form-group">
+                        <label>画面内容</label>
+                        <textarea id="edit-shot-content" rows="3" placeholder="画面描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>对白 / 音效</label>
+                        <textarea id="edit-shot-dialog" rows="2" placeholder="对白或音效标注"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>打光风格</label>
+                        <select id="edit-shot-lighting"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>情绪基调</label>
+                        <select id="edit-shot-mood">
+                            <option value="">请选择</option>
+                            <option value="happy">欢快</option>
+                            <option value="sad">悲伤</option>
+                            <option value="tense">紧张</option>
+                            <option value="romantic">浪漫</option>
+                            <option value="mysterious">神秘</option>
+                            <option value="dramatic">戏剧性</option>
+                        </select>
+                    </div>
+                    <div class="shot-prompts">
+                        <h4>✨ AI 提示词</h4>
+                        <div class="form-group">
+                            <label>图片提示词</label>
+                            <textarea id="edit-shot-image-prompt" rows="2" readonly></textarea>
+                            <button class="btn btn-sm btn-outline" onclick="regenerateImagePrompt()">🔄 更新</button>
+                        </div>
+                        <div class="form-group">
+                            <label>视频提示词</label>
+                            <textarea id="edit-shot-video-prompt" rows="2" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeShotEditModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveShotEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 消息提示 -->
+    <div id="toast-container"></div>
+
+    <!-- 首次使用引导 -->
+    <div id="welcome-guide" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10001; justify-content: center; align-items: center;">
+        <div style="background: var(--bg-panel); border-radius: 16px; padding: 40px; max-width: 600px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="font-size: 64px; margin-bottom: 20px;">🎬</div>
+            <h2 style="color: var(--text); margin-bottom: 16px; font-size: 24px;">欢迎使用 AI短剧创作工作台</h2>
+            <p style="color: var(--text-dim); margin-bottom: 30px; line-height: 1.8;">
+                专业级短剧剧本创作工具<br>
+                包含大纲生成、剧本编辑、分镜设计、角色库等功能
+            </p>
+            <div style="text-align: left; margin-bottom: 30px;">
+                <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-dark); border-radius: 8px;">
+                    <strong style="color: var(--primary);">📝 创作流程</strong>
+                    <div style="color: var(--text-dim); font-size: 13px; margin-top: 6px;">
+                        大纲 → 剧本 → 分镜 → 故事板
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-dark); border-radius: 8px;">
+                    <strong style="color: var(--primary);">💾 数据保存</strong>
+                    <div style="color: var(--text-dim); font-size: 13px; margin-top: 6px;">
+                        自动保存每30秒，数据保存在本地浏览器
+                    </div>
+                </div>
+                <div style="padding: 12px; background: var(--bg-dark); border-radius: 8px;">
+                    <strong style="color: var(--primary);">📱 安装应用</strong>
+                    <div style="color: var(--text-dim); font-size: 13px; margin-top: 6px;">
+                        点击地址栏 📦 图标即可安装到桌面
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeWelcomeGuide()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), #9333ea); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold;">
+                🚀 开始创作
+            </button>
+            <div style="margin-top: 16px; font-size: 12px; color: var(--text-dim);">
+                按 <kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px;">?</kbd> 随时查看帮助
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作成功提示（操作反馈） -->
+    <div id="action-feedback" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border-radius: 16px; padding: 40px; z-index: 10000; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        <div id="action-feedback-icon" style="font-size: 64px; margin-bottom: 16px;">✅</div>
+        <div id="action-feedback-text" style="color: white; font-size: 18px; font-weight: bold;">操作成功</div>
+    </div>
+
+    <!-- 同步状态指示器 -->
+    <div id="sync-status" style="display: none; position: fixed; top: 70px; right: 20px; padding: 10px 16px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; z-index: 9998; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer;" onclick="showSyncPanel()">
+        <span id="sync-icon">🔄</span>
+        <span id="sync-text">同步中...</span>
+        <span id="sync-user" style="color: var(--text-dim); margin-left: 8px;"></span>
+    </div>
+
+    <!-- 大数据搜索弹窗 -->
+    <div id="big-search-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: var(--bg-panel); border-radius: 16px; width: 90%; max-width: 800px; max-height: 80vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: var(--text);">🔍 大数据查询 - 全网素材搜索</h3>
+                <button onclick="closeBigSearchModal()" style="background: none; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer;">✕</button>
+            </div>
+            <div style="padding: 20px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <input type="text" id="big-search-input" placeholder="输入关键词搜索全网素材..." style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-dark); color: var(--text); font-size: 14px;">
+                    <select id="big-search-category" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-dark); color: var(--text);">
+                        <option value="all">全部分类</option>
+                        <option value="character">角色素材</option>
+                        <option value="scene">场景素材</option>
+                        <option value="plot">剧情素材</option>
+                        <option value="dialog">对白素材</option>
+                        <option value="template">模板素材</option>
+                    </select>
+                    <button onclick="executeBigSearch()" style="padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">搜索</button>
+                </div>
+                <div id="big-search-results" style="max-height: 400px; overflow-y: auto;">
+                    <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                        <div>输入关键词开始搜索全网素材</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 素材库弹窗 -->
+    <div id="materials-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: var(--bg-panel); border-radius: 16px; width: 90%; max-width: 900px; max-height: 80vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: var(--text);">📚 创作素材库</h3>
+                <button onclick="closeMaterialsModal()" style="background: none; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer;">✕</button>
+            </div>
+            <div style="padding: 20px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button onclick="filterMaterials('all')" class="material-filter-btn active" data-type="all" style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 20px; cursor: pointer;">全部</button>
+                    <button onclick="filterMaterials('character')" class="material-filter-btn" data-type="character" style="padding: 8px 16px; background: var(--bg-dark); color: var(--text); border: none; border-radius: 20px; cursor: pointer;">👤 角色</button>
+                    <button onclick="filterMaterials('scene')" class="material-filter-btn" data-type="scene" style="padding: 8px 16px; background: var(--bg-dark); color: var(--text); border: none; border-radius: 20px; cursor: pointer;">🎬 场景</button>
+                    <button onclick="filterMaterials('dialog')" class="material-filter-btn" data-type="dialog" style="padding: 8px 16px; background: var(--bg-dark); color: var(--text); border: none; border-radius: 20px; cursor: pointer;">💬 对白</button>
+                    <button onclick="filterMaterials('plot')" class="material-filter-btn" data-type="plot" style="padding: 8px 16px; background: var(--bg-dark); color: var(--text); border: none; border-radius: 20px; cursor: pointer;">📊 剧情</button>
+                    <button onclick="filterMaterials('favorite')" class="material-filter-btn" data-type="favorite" style="padding: 8px 16px; background: var(--bg-dark); color: var(--text); border: none; border-radius: 20px; cursor: pointer;">⭐ 收藏</button>
+                </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <input type="text" id="material-search" placeholder="搜索素材..." style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-dark); color: var(--text); font-size: 14px;">
+                    <button onclick="searchMaterialsList()" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">搜索</button>
+                    <button onclick="showAddMaterialForm()" style="padding: 10px 20px; background: var(--success); color: white; border: none; border-radius: 8px; cursor: pointer;">➕ 添加</button>
+                </div>
+                <div id="materials-list" style="max-height: 400px; overflow-y: auto;">
+                    <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📚</div>
+                        <div>暂无素材，点击添加或从搜索结果中保存</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 同步面板弹窗 -->
+    <div id="sync-panel-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: var(--bg-panel); border-radius: 16px; width: 90%; max-width: 600px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: var(--text);">🔄 同步与账号</h3>
+                <button onclick="closeSyncPanel()" style="background: none; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer;">✕</button>
+            </div>
+            <div style="padding: 20px;">
+                <!-- 当前账号 -->
+                <div style="background: var(--bg-dark); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px;">👤</div>
+                        <div>
+                            <div id="sync-user-name" style="font-weight: bold; color: var(--text);">加载中...</div>
+                            <div id="sync-user-status" style="font-size: 12px; color: var(--text-dim);">本地模式</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 同步设置 -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-dark); border-radius: 8px; cursor: pointer;">
+                        <input type="checkbox" id="sync-enabled" onchange="toggleSync(this.checked)" style="width: 20px; height: 20px;">
+                        <div>
+                            <div style="font-weight: bold; color: var(--text);">开启云端同步</div>
+                            <div style="font-size: 12px; color: var(--text-dim);">需要注册账号，同步项目到云端</div>
+                        </div>
+                    </label>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button onclick="manualSync()" style="flex: 1; min-width: 120px; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">🔄 立即同步</button>
+                    <button onclick="showExportImport()" style="flex: 1; min-width: 120px; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 8px; cursor: pointer;">📤 导出/导入</button>
+                    <button onclick="registerAccount()" style="flex: 1; min-width: 120px; padding: 12px; background: var(--success); color: white; border: none; border-radius: 8px; cursor: pointer;">📝 注册账号</button>
+                </div>
+                
+                <!-- 同步历史 -->
+                <div style="margin-top: 20px;">
+                    <div style="font-weight: bold; color: var(--text); margin-bottom: 12px;">同步历史</div>
+                    <div id="sync-history" style="max-height: 150px; overflow-y: auto; font-size: 12px; color: var(--text-dim);">
+                        暂无同步记录
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 离线状态指示器 -->
+    <div id="network-status" style="display: none; position: fixed; top: 70px; right: 20px; padding: 10px 20px; background: #f59e0b; color: white; border-radius: 8px; z-index: 9998; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+        <span>📡 离线模式</span>
+    </div>
+
+    <!-- 快捷键提示浮层 -->
+    <div id="keyboard-hint" style="display: none; position: fixed; bottom: 60px; right: 20px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; z-index: 9997; max-width: 300px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 12px; color: var(--text);">⌨️ 快捷键提示</div>
+        <div style="font-size: 12px; color: var(--text-dim); line-height: 1.8;">
+            <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px; font-size: 11px;">Ctrl+S</kbd> 保存</div>
+            <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px; font-size: 11px;">Ctrl+K</kbd> 搜索</div>
+            <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px; font-size: 11px;">Ctrl+N</kbd> 新建</div>
+            <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px; font-size: 11px;">Ctrl+Z</kbd> 撤销</div>
+        </div>
+        <button onclick="document.getElementById('keyboard-hint').style.display='none'" style="margin-top: 12px; width: 100%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">知道了</button>
+    </div>
+
+    <!-- Loading 加载遮罩 -->
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+        <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🤖</div>
+            <div id="loading-text" style="color: white; font-size: 18px;">AI正在创作中...</div>
+            <div style="margin-top: 20px; color: #888;">请稍候</div>
+        </div>
+    </div>
+
+    <!-- ==================== 脚本引用（按依赖顺序加载） ==================== -->
+    <!-- 核心数据层 -->
+    <script src="js/core/app.js"></script>
+    
+    <!-- 数据管理层 -->
+    <script src="js/core/project-manager.js"></script>
+    <script src="js/modules/storyboard-templates.js"></script>
+    <script src="js/modules/advanced-modules.js"></script>
+    
+    <!-- 基础功能层 (Phase 1) -->
+    <script src="js/modules/app-phase1.js"></script>
+    
+    <!-- 增强功能层 (Phase 2) -->
+    <script src="js/modules/app-phase2.js"></script>
+    <script src="js/modules/app-phase2-render.js"></script>
+    
+    <!-- 内容管理层 (Phase 3) -->
+    <script src="js/modules/app-phase3.js"></script>
+    
+    <!-- 高级功能层 (Phase 4) -->
+    <script src="js/modules/app-phase4.js"></script>
+    
+    <!-- 安全存储框架（必须最先加载） -->
+    <script src="js/core-lib/app-secure.js"></script>
+    
+    <!-- 性能优化工具 -->
+    <script src="js/core-lib/app-perf.js"></script>
+    
+    <!-- 移动端适配 -->
+    <script src="js/core-lib/app-mobile.js"></script>
+    
+    <!-- 高级提示词引擎 -->
+    <script src="js/core-lib/app-prompt.js"></script>
+    
+    <!-- 视频生成模块 -->
+    <script src="js/integrations/app-video.js"></script>
+    
+    <!-- 协作功能模块 -->
+    <script src="js/integrations/app-collab.js"></script>
+    
+    <!-- 模板市场与素材库 -->
+    <script src="js/integrations/app-template.js"></script>
+    
+    <!-- 云端同步系统 -->
+    <script src="js/integrations/app-cloud-sync.js"></script>
+    
+    <!-- 对外 API 接口与数据导出 -->
+    <script src="js/integrations/app-api.js"></script>
+    
+    <!-- ComfyUI 连接器 - 作为外部AI平台的资料提供方 -->
+    <script src="js/integrations/app-comfyui.js"></script>
+    
+    <!-- 自动化测试框架 (可根据需要启用) -->
+    <script src="js/test/test-framework.js"></script>
+    
+    <!-- 错误处理框架 -->
+    <script src="js/core-lib/app-error.js"></script>
+    
+    <!-- 云端同步与素材库 (Phase 5) -->
+    <script src="js/integrations/app-sync.js"></script>
+    
+    <!-- 版本管理与更新系统 (Phase 5+) -->
+    <script src="js/integrations/app-update.js"></script>
+
+    <!-- 智能 Agent 助手 (Phase 5++) -->
+    <script src="js/integrations/app-agent.js"></script>
+
+    <!-- LLM 大模型连接器 (Phase 5+++) -->
+    <script src="js/integrations/app-llm.js"></script>
+    
+    <!-- 脚本加载顺序保障 -->
+    <script>
+    (function() {
+        const requiredModules = [
+            'ErrorManager',
+            'AppState',
+            'ProjectManager',
+            'UpdateManager',
+            'LLMManager',
+            'AgentUI'
+        ];
+        
+        let checkInterval = setInterval(() => {
+            const missing = requiredModules.filter(name => typeof window[name] === 'undefined');
+            if (missing.length === 0) {
+                clearInterval(checkInterval);
+                console.log('✅ 所有模块加载完成');
+                if (window.onAppReady) window.onAppReady();
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            const missing = requiredModules.filter(name => typeof window[name] === 'undefined');
+            if (missing.length > 0) {
+                console.warn(`⚠️ 部分模块加载超时: ${missing.join(', ')}`);
+                if (window.ErrorManager) {
+                    ErrorManager.notify({ type: 'network', message: `模块加载超时: ${missing.join(', ')}` });
+                }
+            }
+        }, 5000);
+    })();
+    </script>
+    
+    <!-- ==================== 全局函数兼容层（确保向后兼容） ==================== -->
+    <script>
+    // 确保所有缺失的全局函数都有定义，避免 console 报错
+    (function() {
+        // Toast 函数 - 使用 toast-container
+        if (typeof showToast === 'undefined') {
+            window.showToast = function(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast-item toast-' + type;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 24px;
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                    color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                `;
+                toast.textContent = message;
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            };
+        }
+
+        // Loading 函数
+        if (typeof showLoading === 'undefined') {
+            window.showLoading = function(text = 'AI正在创作中...') {
+                const overlay = document.getElementById('loading-overlay');
+                const textEl = document.getElementById('loading-text');
+                if (overlay) {
+                    if (textEl) textEl.textContent = text;
+                    overlay.style.display = 'flex';
+                }
+            };
+        }
+        if (typeof hideLoading === 'undefined') {
+            window.hideLoading = function() {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) overlay.style.display = 'none';
+            };
+        }
+
+        // 缺失的辅助函数
+        window.optimizeOutline = window.optimizeOutline || function() {
+            showToast('优化功能开发中...', 'info');
+        };
+        window.optimizeScript = window.optimizeScript || function() {
+            showToast('优化功能开发中...', 'info');
+        };
+        window.optimizeNovel = window.optimizeNovel || function() {
+            showToast('优化功能开发中...', 'info');
+        };
+        window.importOutline = window.importOutline || function() {
+            const outline = document.getElementById('outline-result-content');
+            const script = document.getElementById('script-input');
+            if (outline && script) {
+                script.value = outline.textContent;
+                showToast('已从大纲导入', 'success');
+            }
+        };
+        window.importFromScript = window.importFromScript || function() {
+            const script = document.getElementById('script-result-content');
+            const storyboard = document.getElementById('storyboard-input');
+            if (script && storyboard) {
+                storyboard.value = script.textContent;
+                showToast('已从剧本导入', 'success');
+            }
+        };
+        window.loadTemplate = window.loadTemplate || function(type) {
+            showToast('模板功能开发中...', 'info');
+        };
+        window.showTemplates = window.showTemplates || function() {
+            if (typeof ProjectTemplates !== 'undefined') {
+                ProjectTemplates.showTemplateModal();
+            } else {
+                showToast('模板功能开发中...', 'info');
+            }
+        };
+        window.showKeyboardShortcuts = window.showKeyboardShortcuts || function() {
+            const modal = document.getElementById('shortcuts-modal');
+            if (modal) modal.style.display = 'flex';
+        };
+        window.analyzeIssues = window.analyzeIssues || function() {
+            if (typeof AIAssistant !== 'undefined') {
+                AIAssistant.showAnalysis();
+            } else {
+                showToast('分析功能开发中...', 'info');
+            }
+        };
+        window.showProjectSettings = window.showProjectSettings || function() {
+            showToast('项目设置功能开发中...', 'info');
+        };
+        window.showVersionHistory = window.showVersionHistory || function() {
+            const modal = document.getElementById('version-modal');
+            if (modal) modal.style.display = 'flex';
+        };
+        window.showExportPanel = window.showExportPanel || function() {
+            if (typeof ExportManager !== 'undefined') {
+                ExportManager.showExportModal();
+            } else {
+                showToast('导出功能开发中...', 'info');
+            }
+        };
+        window.regenerateImagePrompt = window.regenerateImagePrompt || function() {
+            showToast('正在重新生成提示词...', 'info');
+        };
+
+        // 故事板相关函数
+        window.loadTemplateToBoard = window.loadTemplateToBoard || function(id) {
+            if (typeof STORYBOARD_TEMPLATES !== 'undefined') {
+                const tmpl = STORYBOARD_TEMPLATES[id];
+                if (tmpl && tmpl.content && tmpl.content.shots) {
+                    projectData.shots = tmpl.content.shots;
+                    renderStoryboard();
+                    showToast('模板已加载', 'success');
+                }
+            }
+        };
+        window.renderStoryboard = window.renderStoryboard || function() {
+            console.log('故事板渲染函数');
+        };
+        window.refreshStoryboard = window.refreshStoryboard || function() {
+            renderStoryboard();
+            showToast('已刷新', 'success');
+        };
+        window.exportStoryboard = window.exportStoryboard || function() {
+            if (typeof ExportManager !== 'undefined') {
+                ExportManager.exportToHtml();
+            } else {
+                showToast('导出功能开发中...', 'info');
+            }
+        };
+        window.detectDuplicateShots = window.detectDuplicateShots || function() {
+            showToast('重复检测功能开发中...', 'info');
+        };
+        window.optimizeAllPrompts = window.optimizeAllPrompts || function() {
+            showToast('提示词优化功能开发中...', 'info');
+        };
+        window.optimizeStoryboardWithBigData = window.optimizeStoryboardWithBigData || function() {
+            showToast('大数据优化功能开发中...', 'info');
+        };
+        window.regenerateStoryboard = window.regenerateStoryboard || function() {
+            showToast('正在重新生成分镜...', 'info');
+        };
+        window.addShotManually = window.addShotManually || function() {
+            const shot = {
+                id: Date.now(),
+                type: '中景',
+                scene: '新场景',
+                characters: '',
+                cameraMove: '固定',
+                duration: '5s',
+                mood: '平静',
+                content: '请描述画面内容',
+                dialog: '',
+                imagePrompt: '',
+                videoPrompt: '',
+                characterPrompt: '',
+                lighting: '自然光'
+            };
+            projectData.shots = projectData.shots || [];
+            projectData.shots.push(shot);
+            if (typeof renderShotList === 'function') {
+                renderShotList(projectData.shots);
+            }
+            showToast('已添加分镜', 'success');
+        };
+
+        // 角色库和场景库函数
+        window.addCharacter = window.addCharacter || function() {
+            if (typeof CharacterLibrary !== 'undefined') {
+                CharacterLibrary.addCharacter();
+            } else {
+                showToast('角色库功能开发中...', 'info');
+            }
+        };
+        window.addScene = window.addScene || function() {
+            if (typeof SceneLibrary !== 'undefined') {
+                SceneLibrary.addScene();
+            } else {
+                showToast('场景库功能开发中...', 'info');
+            }
+        };
+
+        // 节拍表函数
+        window.changeBeatStructure = window.changeBeatStructure || function() {
+            if (typeof BeatSheet !== 'undefined') {
+                const sel = document.getElementById('beat-structure');
+                if (sel) BeatSheet.changeStructure(sel.value);
+            }
+        };
+
+        // 创建项目相关
+        window.createNewProject = window.createNewProject || function() {
+            const modal = document.getElementById('create-project-modal');
+            if (modal) modal.style.display = 'flex';
+        };
+        window.closeCreateModal = window.closeCreateModal || function() {
+            const modal = document.getElementById('create-project-modal');
+            if (modal) modal.style.display = 'none';
+        };
+
+        // 弹窗关闭函数
+        window.closeOnboarding = window.closeOnboarding || function() {
+            const modal = document.getElementById('onboarding-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        window.closeHistoryModal = window.closeHistoryModal || function() {
+            const modal = document.getElementById('history-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        window.closeVersionModal = window.closeVersionModal || function() {
+            const modal = document.getElementById('version-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        window.closeShortcutsModal = window.closeShortcutsModal || function() {
+            const modal = document.getElementById('shortcuts-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        window.closeShotEditModal = window.closeShotEditModal || function() {
+            const modal = document.getElementById('shot-edit-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        window.saveShotEdit = window.saveShotEdit || function() {
+            showToast('分镜已保存', 'success');
+            closeShotEditModal();
+        };
+
+        // 创作历史
+        window.saveVersion = window.saveVersion || function() {
+            showToast('版本已保存', 'success');
+        };
+        window.jumpToStep = window.jumpToStep || function(step) {
+            const tabMap = {1: 'outline', 2: 'script', 3: 'storyboard', 4: 'board'};
+            if (tabMap[step] && typeof switchTab === 'function') {
+                switchTab(tabMap[step]);
+            }
+        };
+
+        // 侧边栏相关
+        window.toggleSidebar = window.toggleSidebar || function() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('collapsed');
+        };
+        window.togglePropertiesPanel = window.togglePropertiesPanel || function() {
+            const panel = document.getElementById('properties-panel');
+            if (panel) panel.classList.toggle('collapsed');
+        };
+
+        // AI 提示词助手
+        window.updatePromptPreview = window.updatePromptPreview || function() {
+            const sceneType = document.getElementById('prompt-scene-type');
+            const mood = document.getElementById('prompt-mood');
+            const preview = document.getElementById('prompt-preview');
+            if (sceneType && mood && preview) {
+                preview.value = `场景: ${sceneType.value}\n情绪: ${mood.value}`;
+            }
+        };
+        window.copyPrompt = window.copyPrompt || function() {
+            const preview = document.getElementById('prompt-preview');
+            if (preview) {
+                navigator.clipboard.writeText(preview.value);
+                showToast('已复制到剪贴板', 'success');
+            }
+        };
+
+        // 批量操作
+        window.generateAll = window.generateAll || function() {
+            const title = (document.getElementById('project-name') || {}).value || '未定名短剧';
+            const genre = (document.getElementById('genre') || {}).value || '都市情感';
+            const style = (document.getElementById('style') || {}).value || '温暖治愈';
+
+            if (!projectData.outline) {
+                // 阶段1：生成大纲
+                showToast('🚀 开始生成大纲...', 'info');
+                switchTab('outline');
+                // 触发大纲生成
+                setTimeout(() => {
+                    if (typeof generateOutline === 'function') {
+                        projectData.metadata.title = title;
+                        generateOutline();
+                    }
+                }, 500);
+            } else {
+                proceedToScript();
+            }
+
+            function proceedToScript() {
+                if (!projectData.script) {
+                    showToast('🚀 正在生成剧本...', 'info');
+                    switchTab('script');
+                    document.getElementById('script-input').value = projectData.outline;
+                    setTimeout(() => {
+                        if (typeof generateScript === 'function') generateScript();
+                    }, 500);
+                } else {
+                    proceedToStoryboard();
+                }
+            }
+
+            function proceedToStoryboard() {
+                showToast('🚀 正在生成分镜...', 'info');
+                switchTab('storyboard');
+                document.getElementById('storyboard-input').value = projectData.script;
+                setTimeout(() => {
+                    if (typeof generateStoryboard === 'function') generateStoryboard();
+                }, 500);
+            }
+
+            // 监听剧本生成完成 → 自动继续
+            const origGenerateScript = window.generateScript;
+            window.generateScript = function() {
+                origGenerateScript && origGenerateScript.apply(this, arguments);
+                setTimeout(proceedToStoryboard, 3000);
+            };
+
+            showToast('🚀 一键生成已启动，请依次完成各阶段', 'success');
+        };
+        window.clearAll = window.clearAll || function() {
+            if (confirm('确定要清空所有内容吗？此操作不可撤销。')) {
+                projectData = {
+                    outline: '',
+                    script: '',
+                    novel: '',
+                    shots: [],
+                    characters: [],
+                    scenes: [],
+                    beats: { structure: 'three-act', beats: [] },
+                    metadata: {
+                        title: '',
+                        genre: '',
+                        style: '',
+                        duration: '',
+                        episodes: '',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        version: '2.0'
+                    }
+                };
+                localStorage.removeItem('shortDramaProject');
+                showToast('已清空所有内容', 'success');
+                location.reload();
+            }
+        };
+
+        // 内容编辑
+        window.editContent = window.editContent || function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.contentEditable = 'true';
+                el.focus();
+                showToast('已进入编辑模式，点击其他地方保存', 'info');
+            }
+        };
+        window.copyContent = window.copyContent || function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent);
+                showToast('已复制到剪贴板', 'success');
+            }
+        };
+        window.continueToScript = window.continueToScript || function() {
+            switchTab('script');
+        };
+        window.continueToStoryboard = window.continueToStoryboard || function() {
+            switchTab('storyboard');
+        };
+
+        // 快捷键处理
+        window.setStatus = window.setStatus || function(text) {
+            const el = document.getElementById('project-status-bar');
+            if (el) el.textContent = text;
+        };
+
+        // 初始化检查
+        window.updateSaveStatus = window.updateSaveStatus || function(status) {
+            const el = document.getElementById('save-status');
+            if (el) {
+                const savedEl = el.querySelector('.save-indicator.saved');
+                const savingEl = el.querySelector('.save-indicator.saving');
+                if (status === 'saving') {
+                    if (savingEl) savingEl.style.display = 'inline';
+                    if (savedEl) savedEl.style.display = 'none';
+                } else {
+                    if (savingEl) savingEl.style.display = 'none';
+                    if (savedEl) savedEl.style.display = 'inline';
+                }
+            }
+        };
+
+        window.updateProjectStats = window.updateProjectStats || function() {
+            // 更新统计信息
+            const outlineEl = document.getElementById('stat-outline');
+            const scriptEl = document.getElementById('stat-script');
+            const shotsEl = document.getElementById('stat-shots');
+            
+            if (outlineEl && projectData.outline) {
+                outlineEl.textContent = projectData.outline.length + ' 字';
+            }
+            if (scriptEl && projectData.script) {
+                scriptEl.textContent = projectData.script.length + ' 字';
+            }
+            if (shotsEl && projectData.shots) {
+                shotsEl.textContent = projectData.shots.length + ' 个';
+            }
+            
+            // 更新底部状态栏
+            const wordCountEl = document.getElementById('word-count');
+            const shotCountEl = document.getElementById('shot-count-stat');
+            if (wordCountEl) {
+                const total = (projectData.outline || '').length + (projectData.script || '').length;
+                wordCountEl.textContent = '字数: ' + total;
+            }
+            if (shotCountEl) {
+                shotCountEl.textContent = '分镜: ' + (projectData.shots ? projectData.shots.length : 0);
+            }
+        };
+
+        console.log('✅ 全局函数兼容层初始化完成');
+    })();
+
+    // 添加 CSS 动画
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // PWA Service Worker 注册（增强版）
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(registration => {
+                    console.log('✅ PWA Service Worker 注册成功');
+                    console.log('📦 Service Worker 作用域:', registration.scope);
+                    
+                    // 检查更新
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 发现新版本，请刷新页面更新');
+                                showToast('发现新版本，刷新页面即可更新', 'info');
+                            }
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.warn('⚠️ PWA Service Worker 注册失败:', err);
+                    // 非致命错误，应用仍可正常使用
+                });
+        });
+    } else {
+        console.log('ℹ️ 当前浏览器不支持 Service Worker，将以普通网页模式运行');
+    }
+
+    // 全局错误处理
+    window.addEventListener('error', (event) => {
+        console.error('全局错误:', event.error);
+    });
+    
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('未处理的 Promise 拒绝:', event.reason);
+    });
+
+    // DOM 加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🎬 AI短剧创作工作台初始化中...');
+        
+        // 网络状态监测
+        function updateNetworkStatus() {
+            const statusEl = document.getElementById('network-status');
+            if (statusEl) {
+                if (navigator.onLine) {
+                    statusEl.style.display = 'none';
+                } else {
+                    statusEl.style.display = 'block';
+                    statusEl.innerHTML = '📡 <span>离线模式 - 数据已保存本地</span>';
+                }
+            }
+        }
+        
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        updateNetworkStatus(); // 初始检查
+        
+        // 首次访问显示快捷键提示
+        const hasShownHint = localStorage.getItem('keyboardHintShown');
+        if (!hasShownHint) {
+            setTimeout(() => {
+                const hint = document.getElementById('keyboard-hint');
+                if (hint) {
+                    hint.style.display = 'block';
+                    localStorage.setItem('keyboardHintShown', 'true');
+                }
+            }, 5000); // 5秒后显示
+        }
+        
+        // 初始化 Phase 模块
+        try {
+            if (typeof DragSortManager !== 'undefined' && DragSortManager.init) {
+                DragSortManager.init();
+                DragSortManager.enableDragSort();
+                DragSortManager.initTouchSupport();
+            }
+        } catch (e) { console.warn('DragSortManager 初始化失败:', e); }
+        
+        try {
+            if (typeof CharacterLibrary !== 'undefined' && CharacterLibrary.init) {
+                CharacterLibrary.init();
+            }
+        } catch (e) { console.warn('CharacterLibrary 初始化失败:', e); }
+        
+        try {
+            if (typeof BeatSheet !== 'undefined' && BeatSheet.init) {
+                BeatSheet.init();
+            }
+        } catch (e) { console.warn('BeatSheet 初始化失败:', e); }
+        
+        try {
+            if (typeof ScriptEditor !== 'undefined' && ScriptEditor.init) {
+                ScriptEditor.init();
+            }
+        } catch (e) { console.warn('ScriptEditor 初始化失败:', e); }
+        
+        try {
+            if (typeof SearchSystem !== 'undefined' && SearchSystem.init) {
+                SearchSystem.init();
+            }
+        } catch (e) { console.warn('SearchSystem 初始化失败:', e); }
+        
+        try {
+            if (typeof ModalSystem !== 'undefined' && ModalSystem.init) {
+                ModalSystem.init();
+            }
+        } catch (e) { console.warn('ModalSystem 初始化失败:', e); }
+        
+        // 首次使用引导
+        const hasSeenWelcome = localStorage.getItem('welcomeSeen');
+        if (!hasSeenWelcome) {
+            setTimeout(() => {
+                const welcome = document.getElementById('welcome-guide');
+                if (welcome) welcome.style.display = 'flex';
+            }, 300);
+        }
+        
+        // 恢复上次打开的 Tab
+        const lastTab = localStorage.getItem('lastActiveTab');
+        if (lastTab && typeof switchTab === 'function') {
+            setTimeout(() => switchTab(lastTab), 100);
+        }
+        
+        // 更新统计数据
+        if (typeof updateProjectStats === 'function') {
+            updateProjectStats();
+        }
+        
+        // 设置自动保存（每30秒）
+        window.autoSaveTimer = setInterval(() => {
+            if (typeof saveProject === 'function') {
+                saveProject();
+                console.log('📅 自动保存已执行');
+            }
+        }, 30000); // 30秒自动保存
+        
+        // 全局快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+S 保存
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (typeof saveProject === 'function') {
+                    saveProject();
+                }
+            }
+            // Ctrl+Z 撤销
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                if (typeof UndoRedoManager !== 'undefined' && UndoRedoManager.undo) {
+                    UndoRedoManager.undo();
+                }
+            }
+            // Ctrl+Y 或 Ctrl+Shift+Z 重做
+            if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+                e.preventDefault();
+                if (typeof UndoRedoManager !== 'undefined' && UndoRedoManager.redo) {
+                    UndoRedoManager.redo();
+                }
+            }
+            // Ctrl+K 搜索
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                if (typeof SearchSystem !== 'undefined' && SearchSystem.show) {
+                    SearchSystem.show();
+                } else {
+                    const cmdModal = document.getElementById('command-palette-modal');
+                    if (cmdModal) cmdModal.style.display = 'flex';
+                }
+            }
+            // Ctrl+N 新建项目
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                if (typeof createNewProject === 'function') {
+                    createNewProject();
+                }
+            }
+            // Ctrl+1-6 切换 Tab
+            if (e.ctrlKey && e.key >= '1' && e.key <= '6') {
+                e.preventDefault();
+                const tabs = ['outline', 'script', 'novel', 'storyboard', 'board', 'characters'];
+                const idx = parseInt(e.key) - 1;
+                if (tabs[idx] && typeof switchTab === 'function') {
+                    switchTab(tabs[idx]);
+                }
+            }
+            // Escape 关闭弹窗
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+        });
+        
+        // 性能监控
+        if (typeof window.PerformanceObserver !== 'undefined') {
+            try {
+                // 监控长任务
+                const observer = new PerformanceObserver((list) => {
+                    list.getEntries().forEach((entry) => {
+                        if (entry.duration > 50) {
+                            console.warn(`⚠️ 长任务检测: ${entry.name} 耗时 ${entry.duration.toFixed(2)}ms`);
+                        }
+                    });
+                });
+                observer.observe({ entryTypes: ['longtask'] });
+            } catch (e) {
+                console.warn('性能监控不可用:', e);
+            }
+        }
+        
+        // 图片懒加载
+        if ('IntersectionObserver' in window) {
+            const lazyImages = document.querySelectorAll('img.lazy');
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            img.classList.remove('lazy');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+            lazyImages.forEach((img) => imageObserver.observe(img));
+        }
+        
+        // 防抖函数
+        window.debounce = function(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        };
+        
+        // 节流函数
+        window.throttle = function(func, limit) {
+            let inThrottle;
+            return function executedFunction(...args) {
+                if (!inThrottle) {
+                    func(...args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        };
+        
+        // 全局帮助函数
+        window.showHelp = function() {
+            const hint = document.getElementById('keyboard-hint');
+            if (hint) hint.style.display = 'block';
+        };
+        
+        // 关闭欢迎引导
+        window.closeWelcomeGuide = function() {
+            const welcome = document.getElementById('welcome-guide');
+            if (welcome) {
+                welcome.style.opacity = '0';
+                welcome.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    welcome.style.display = 'none';
+                    localStorage.setItem('welcomeSeen', 'true');
+                }, 300);
+            }
+        };
+        
+        // 操作成功反馈（居中大图标提示）
+        window.showActionFeedback = function(icon = '✅', text = '操作成功', duration = 1500) {
+            const feedback = document.getElementById('action-feedback');
+            const iconEl = document.getElementById('action-feedback-icon');
+            const textEl = document.getElementById('action-feedback-text');
+            
+            if (feedback && iconEl && textEl) {
+                iconEl.textContent = icon;
+                textEl.textContent = text;
+                feedback.style.display = 'flex';
+                feedback.style.opacity = '1';
+                feedback.style.transform = 'translate(-50%, -50%) scale(1)';
+                feedback.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                    feedback.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                    setTimeout(() => {
+                        feedback.style.display = 'none';
+                    }, 300);
+                }, duration);
+            }
+        };
+        
+        // ========== 同步系统 UI 函数 ==========
+        
+        // 显示同步状态指示器
+        window.showSyncStatus = function() {
+            const status = document.getElementById('sync-status');
+            if (status) {
+                status.style.display = 'block';
+            }
+        };
+        
+        // 更新同步状态显示
+        window.updateSyncDisplay = async function() {
+            const userName = document.getElementById('sync-user-name');
+            const userStatus = document.getElementById('sync-user-status');
+            const syncUser = document.getElementById('sync-user');
+            
+            if (window.SyncSystem) {
+                const sync = window.SyncSystem.getSyncManager();
+                if (sync && sync.currentUser) {
+                    if (userName) userName.textContent = sync.currentUser.name || sync.currentUser.username || '创作者';
+                    if (userStatus) userStatus.textContent = sync.currentUser.isAnonymous ? '本地模式' : '已登录';
+                    if (syncUser) syncUser.textContent = sync.currentUser.isAnonymous ? '📱' : '☁️';
+                }
+            }
+        };
+        
+        // 显示同步面板
+        window.showSyncPanel = function() {
+            const modal = document.getElementById('sync-panel-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                updateSyncDisplay();
+            }
+        };
+        
+        // 关闭同步面板
+        window.closeSyncPanel = function() {
+            const modal = document.getElementById('sync-panel-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        
+        // 切换同步开关
+        window.toggleSync = async function(enabled) {
+            if (window.SyncSystem) {
+                const sync = window.SyncSystem.getSyncManager();
+                if (sync && sync.currentUser) {
+                    sync.currentUser.settings.syncEnabled = enabled;
+                    if (enabled) {
+                        sync.startAutoSync();
+                        showToast('已开启云端同步', 'success');
+                    } else {
+                        sync.stopAutoSync();
+                        showToast('已关闭云端同步', 'info');
+                    }
+                }
+            }
+        };
+        
+        // 手动同步
+        window.manualSync = async function() {
+            showLoading('正在同步...');
+            try {
+                if (window.SyncSystem) {
+                    await window.SyncSystem.getSyncManager().autoSync();
+                }
+                hideLoading();
+                showActionFeedback('✅', '同步完成');
+                updateSyncDisplay();
+            } catch (error) {
+                hideLoading();
+                showToast('同步失败: ' + error.message, 'error');
+            }
+        };
+        
+        // 显示导出导入面板
+        window.showExportImport = function() {
+            const data = confirm('是否导出所有数据？\n\n确定：导出\n取消：导入');
+            if (data) {
+                window.exportAllData();
+            } else {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                            try {
+                                const data = JSON.parse(event.target.result);
+                                if (window.SyncSystem) {
+                                    await window.SyncSystem.getDB().importAll(data);
+                                    showToast('数据导入成功', 'success');
+                                }
+                            } catch (error) {
+                                showToast('导入失败: ' + error.message, 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            }
+        };
+        
+        // 注册账号（模拟）
+        window.registerAccount = function() {
+            const username = prompt('请输入用户名:');
+            if (username) {
+                const email = prompt('请输入邮箱:');
+                if (email) {
+                    const password = prompt('请输入密码:');
+                    if (password && window.SyncSystem) {
+                        window.SyncSystem.getSyncManager().register(username, email, password)
+                            .then(user => {
+                                showToast('注册成功，已自动登录', 'success');
+                                updateSyncDisplay();
+                            })
+                            .catch(error => {
+                                showToast('注册失败: ' + error.message, 'error');
+                            });
+                    }
+                }
+            }
+        };
+        
+        // 显示大数据搜索
+        window.showBigSearch = function() {
+            const modal = document.getElementById('big-search-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        };
+        
+        // 关闭大数据搜索
+        window.closeBigSearchModal = function() {
+            const modal = document.getElementById('big-search-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        
+        // 执行大数据搜索
+        window.executeBigSearch = async function() {
+            const input = document.getElementById('big-search-input');
+            const category = document.getElementById('big-search-category');
+            const results = document.getElementById('big-search-results');
+            
+            const query = input.value.trim();
+            const cat = category.value;
+            
+            if (!query) {
+                showToast('请输入搜索关键词', 'warning');
+                return;
+            }
+            
+            results.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);"><div style="font-size: 32px;">🔍</div><div>搜索中...</div></div>';
+            
+            try {
+                if (window.bigSearch) {
+                    const searchResults = await window.bigSearch(query, cat);
+                    displaySearchResults(searchResults);
+                }
+            } catch (error) {
+                results.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger);">搜索失败，请重试</div>';
+            }
+        };
+        
+        // 显示搜索结果
+        window.displaySearchResults = function(results) {
+            const container = document.getElementById('big-search-results');
+            if (!results || results.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);"><div style="font-size: 32px;">😕</div><div>未找到相关素材</div></div>';
+                return;
+            }
+            
+            let html = '<div style="display: grid; gap: 12px;">';
+            results.forEach(result => {
+                html += `
+                    <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div style="font-weight: bold; color: var(--text);">${result.title}</div>
+                            <span style="font-size: 11px; padding: 2px 8px; background: var(--primary); border-radius: 10px; color: white;">${result.source}</span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 12px;">${result.description}</div>
+                        <div style="font-size: 12px; color: var(--text-dim); white-space: pre-wrap; margin-bottom: 12px;">${result.content}</div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="saveSearchResultToMaterial('${result.id}', '${result.title}', \`${result.content}\`, '${result.category}')" style="padding: 6px 12px; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">💾 保存到素材库</button>
+                            <button onclick="useSearchResult('${result.id}')" style="padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">📝 使用</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        };
+        
+        // 保存搜索结果到素材库
+        window.saveSearchResultToMaterial = async function(id, title, content, category) {
+            if (window.saveToMaterial) {
+                await window.saveToMaterial(category, content, { title, tags: ['搜索结果'] });
+                showActionFeedback('💾', '已保存到素材库');
+            }
+        };
+        
+        // 使用搜索结果
+        window.useSearchResult = function(id) {
+            closeBigSearchModal();
+            showToast('已复制到剪贴板，可粘贴使用', 'success');
+        };
+        
+        // 显示素材库
+        window.showMaterials = function() {
+            const modal = document.getElementById('materials-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                loadMaterialsList();
+            }
+        };
+        
+        // 关闭素材库
+        window.closeMaterialsModal = function() {
+            const modal = document.getElementById('materials-modal');
+            if (modal) modal.style.display = 'none';
+        };
+        
+        // 筛选素材
+        window.filterMaterials = async function(type) {
+            // 更新按钮样式
+            document.querySelectorAll('.material-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'var(--bg-dark)';
+            });
+            event.target.classList.add('active');
+            event.target.style.background = 'var(--primary)';
+            
+            loadMaterialsList(type);
+        };
+        
+        // 加载素材列表
+        window.loadMaterialsList = async function(type = 'all') {
+            const container = document.getElementById('materials-list');
+            
+            if (window.SyncSystem) {
+                const materials = await window.SyncSystem.getMaterialLibrary().getMaterials(
+                    type === 'all' ? null : type,
+                    { favorite: type === 'favorite' }
+                );
+                
+                if (!materials || materials.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);"><div style="font-size: 48px;">📚</div><div>暂无素材</div></div>';
+                    return;
+                }
+                
+                let html = '<div style="display: grid; gap: 12px;">';
+                materials.forEach(mat => {
+                    html += `
+                        <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-size: 11px; padding: 2px 8px; background: var(--primary); border-radius: 10px; color: white;">${mat.type}</span>
+                                <div>
+                                    <button onclick="toggleMaterialFavorite('${mat.id}')" style="background: none; border: none; cursor: pointer; font-size: 16px;">${mat.favorite ? '⭐' : '☆'}</button>
+                                    <button onclick="deleteMaterial('${mat.id}')" style="background: none; border: none; cursor: pointer; font-size: 16px; color: var(--danger);">🗑️</button>
+                                </div>
+                            </div>
+                            <div style="font-weight: bold; color: var(--text); margin-bottom: 8px;">${mat.title || '无标题'}</div>
+                            <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px; white-space: pre-wrap;">${mat.content.substring(0, 200)}${mat.content.length > 200 ? '...' : ''}</div>
+                            <button onclick="useMaterial('${mat.id}')" style="padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">📝 使用</button>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        };
+        
+        // 搜索素材
+        window.searchMaterialsList = async function() {
+            const input = document.getElementById('material-search');
+            const query = input.value.trim();
+            if (query && window.SyncSystem) {
+                const results = await window.SyncSystem.getMaterialLibrary().getMaterials(null, { search: query });
+                const container = document.getElementById('materials-list');
+                // 显示搜索结果
+                if (results.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">未找到相关素材</div>';
+                } else {
+                    // 复用 loadMaterialsList 的渲染逻辑
+                    let html = '<div style="display: grid; gap: 12px;">';
+                    results.forEach(mat => {
+                        html += `<div style="background: var(--bg-dark); padding: 16px; border-radius: 8px;"><div style="font-weight: bold;">${mat.title}</div><div style="font-size: 12px; color: var(--text-dim);">${mat.content.substring(0, 100)}...</div></div>`;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                }
+            }
+        };
+        
+        // 切换素材收藏
+        window.toggleMaterialFavorite = async function(id) {
+            if (window.SyncSystem) {
+                await window.SyncSystem.getMaterialLibrary().toggleFavorite(id);
+                loadMaterialsList();
+            }
+        };
+        
+        // 删除素材
+        window.deleteMaterial = async function(id) {
+            if (confirm('确定删除此素材？')) {
+                if (window.SyncSystem) {
+                    await window.SyncSystem.getMaterialLibrary().deleteMaterial(id);
+                    showToast('已删除', 'success');
+                    loadMaterialsList();
+                }
+            }
+        };
+        
+        // 使用素材
+        window.useMaterial = async function(id) {
+            if (window.SyncSystem) {
+                const mat = await window.SyncSystem.getMaterialLibrary().useMaterial(id);
+                if (mat) {
+                    navigator.clipboard.writeText(mat.content);
+                    showToast('已复制到剪贴板', 'success');
+                }
+            }
+        };
+        
+        // 显示添加素材表单
+        window.showAddMaterialForm = function() {
+            const type = prompt('素材类型 (character/scene/dialog/plot/template):');
+            if (type) {
+                const title = prompt('素材标题:');
+                const content = prompt('素材内容:');
+                if (title && content && window.saveToMaterial) {
+                    window.saveToMaterial(type, content, { title });
+                    showToast('素材已添加', 'success');
+                    loadMaterialsList();
+                }
+            }
+        };
+        
+        // 初始化同步系统
+        initSyncSystem().then(() => {
+            showSyncStatus();
+            updateSyncDisplay();
+            console.log('🎬 同步系统已就绪');
+        }).catch(err => {
+            console.warn('同步系统初始化失败:', err);
+        });
+        
+        // 初始化版本管理和更新系统
+        if (window.UpdateManager) {
+            window.UpdateManager.init().then(info => {
+                console.log(`📦 版本管理已就绪 [${info.version}]`);
+            }).catch(err => {
+                console.warn('版本管理初始化失败:', err);
+            });
+        }
+        
+        // ========== 同步系统 UI 函数结束 ==========
+        
+        // 清除所有数据（带确认）
+        window.clearAllData = function() {
+            if (confirm('⚠️ 确定要清除所有数据吗？\n\n此操作将删除：\n- 所有项目\n- 所有创作记录\n- 所有设置\n\n此操作不可撤销！')) {
+                localStorage.clear();
+                location.reload();
+            }
+        };
+        
+        // 导出所有数据
+        window.exportAllData = function() {
+            const allData = {
+                projects: [],
+                settings: {},
+                exportDate: new Date().toISOString()
+            };
+            
+            // 收集所有 localStorage 数据
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    try {
+                        allData[key] = JSON.parse(localStorage.getItem(key));
+                    } catch (e) {
+                        allData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `AI短剧创作备份_${new Date().toLocaleDateString()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('全部数据已导出', 'success');
+        };
+        
+        // 显示系统信息
+        window.showSystemInfo = function() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                localStorageSize: JSON.stringify(localStorage).length + ' 字符',
+                serviceWorker: 'serviceWorker' in navigator ? '支持' : '不支持'
+            };
+            console.table(info);
+            alert('系统信息已输出到控制台 (F12)');
+        };
+        
+        // 一键复制项目信息
+        window.copyProjectInfo = function() {
+            const info = `项目：${projectData.title || '未命名'}\n字数：${(projectData.outline + projectData.script).length}\n分镜：${projectData.shots ? projectData.shots.length : 0}个\n角色：${projectData.characters ? projectData.characters.length : 0}个`;
+            navigator.clipboard.writeText(info);
+            showToast('项目信息已复制', 'success');
+        };
+        
+        console.log('✅ AI短剧创作工作台初始化完成');
+        console.log('📋 可用快捷键: Ctrl+S 保存 | Ctrl+Z 撤销 | Ctrl+K 搜索 | Ctrl+N 新建');
+        console.log('📊 性能: 页面加载完成，可在控制台使用 debounce() 和 throttle() 函数');
+        console.log('💡 提示: 输入 showHelp() 显示快捷键 | exportAllData() 导出全部数据');
+    });
+    </script>
+</body>
+</html>

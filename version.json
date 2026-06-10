@@ -1,0 +1,23 @@
+{
+  "version": "3.1.0",
+  "releaseDate": "2026-06-09",
+  "minCompatibleVersion": "1.0.0",
+  "critical": false,
+  "releaseNotes": [
+    "📦 新增版本管理和更新系统",
+    "🔒 更新前自动备份，确保数据安全",
+    "⬆️ 支持版本检测和一键更新",
+    "💾 完整的数据导出和导入功能",
+    "♻️ 支持从备份恢复数据",
+    "🔄 智能数据迁移系统"
+  ],
+  "downloadUrl": "./",
+  "hash": "auto",
+  "features": {
+    "autoBackup": true,
+    "dataMigration": true,
+    "backupRestore": true,
+    "versionCheck": true,
+    "fullExport": true
+  }
+}

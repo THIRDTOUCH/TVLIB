@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="72" height="72">
+  <defs>
+    <linearGradient id="bg-72" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="film-72" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fde68a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- 背景 -->
+  <rect width="72" height="72" rx="12" ry="12" fill="url(#bg-72)"/>
+  <!-- 电影胶片外框 -->
+  <rect x="10.799999999999999" y="15.84" width="50.4" height="40.32000000000001" rx="2.88" fill="url(#film-72)" stroke="#fcd34d" stroke-width="1.44"/>
+  <!-- 胶片左侧孔洞 -->
+  <circle cx="15.84" cy="21.599999999999998" r="1.8" fill="#7c3aed"/>
+  <circle cx="15.84" cy="28.8" r="1.8" fill="#7c3aed"/>
+  <circle cx="15.84" cy="36" r="1.8" fill="#7c3aed"/>
+  <circle cx="15.84" cy="43.199999999999996" r="1.8" fill="#7c3aed"/>
+  <circle cx="15.84" cy="50.4" r="1.8" fill="#7c3aed"/>
+  <!-- 胶片右侧孔洞 -->
+  <circle cx="56.160000000000004" cy="21.599999999999998" r="1.8" fill="#7c3aed"/>
+  <circle cx="56.160000000000004" cy="28.8" r="1.8" fill="#7c3aed"/>
+  <circle cx="56.160000000000004" cy="36" r="1.8" fill="#7c3aed"/>
+  <circle cx="56.160000000000004" cy="43.199999999999996" r="1.8" fill="#7c3aed"/>
+  <circle cx="56.160000000000004" cy="50.4" r="1.8" fill="#7c3aed"/>
+  <!-- 画面屏幕 -->
+  <rect x="21.599999999999998" y="23.04" width="28.8" height="25.919999999999998" rx="1.44" fill="#1a1b26" stroke="#8b5cf6" stroke-width="0.72"/>
+  <!-- 戏剧脸谱 / 演员剪影（简化为戏剧面具） -->
+  <!-- 左面具：喜剧笑脸 -->
+  <circle cx="28.8" cy="34.56" r="4.32" fill="#fde68a" stroke="#f59e0b" stroke-width="1.08"/>
+  <circle cx="27.72" cy="33.120000000000005" r="0.5760000000000001" fill="#1a1b26"/>
+  <circle cx="29.88" cy="33.120000000000005" r="0.5760000000000001" fill="#1a1b26"/>
+  <path d="M 27.36 36.72 Q 28.8 38.160000000000004 30.24 36.72" stroke="#1a1b26" stroke-width="1.08" fill="none" stroke-linecap="round"/>
+  <!-- 右面具：戏剧严肃 -->
+  <circle cx="43.199999999999996" cy="34.56" r="4.32" fill="#fbbf24" stroke="#d97706" stroke-width="1.08"/>
+  <circle cx="42.12" cy="33.120000000000005" r="0.5760000000000001" fill="#1a1b26"/>
+  <circle cx="44.28" cy="33.120000000000005" r="0.5760000000000001" fill="#1a1b26"/>
+  <path d="M 41.76 37.44 Q 43.199999999999996 36 44.64 37.44" stroke="#1a1b26" stroke-width="1.08" fill="none" stroke-linecap="round"/>
+  <!-- 底部文字：创作 -->
+  <rect x="21.599999999999998" y="52.56" width="28.8" height="10.080000000000002" rx="1.44" fill="#7c3aed"/>
+  <text x="36" y="60.12" font-family="'Microsoft YaHei', 'PingFang SC', sans-serif" font-size="5.76" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">创作</text>
+</svg>

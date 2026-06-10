@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI短剧创作工作台 - 自动化测试</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-light: #1e293b;
+      --bg-dark: #020617;
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --accent: #7c3aed;
+      --accent-hover: #8b5cf6;
+      --success: #10b981;
+      --error: #f87171;
+      --warning: #fbbf24;
+      --border: #334155;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background: var(--bg-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--bg-dark);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: var(--bg-light);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .stat-value.passed { color: var(--success); }
+    .stat-value.failed { color: var(--error); }
+    .stat-value.skipped { color: var(--warning); }
+    .stat-value.total { color: var(--accent); }
+    
+    .stat-label {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--accent));
+      transition: width 0.3s ease;
+    }
+    
+    .suite-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .suite-btn {
+      padding: 8px 16px;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-dim);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .suite-btn:hover {
+      background: var(--bg-dark);
+      color: var(--text);
+    }
+    
+    .suite-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .results {
+      background: var(--bg-light);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    
+    .suite {
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .suite:last-child {
+      border-bottom: none;
+    }
+    
+    .suite-header {
+      padding: 16px 20px;
+      background: var(--bg-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .suite-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .suite-stats {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    
+    .suite-tests {
+      display: none;
+      padding: 8px 0;
+    }
+    
+    .suite-tests.open {
+      display: block;
+    }
+    
+    .test {
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .test:last-child {
+      border-bottom: none;
+    }
+    
+    .test-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    
+    .test-icon.passed {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    
+    .test-icon.failed {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--error);
+    }
+    
+    .test-icon.skipped {
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--warning);
+    }
+    
+    .test-icon.pending {
+      background: var(--bg-dark);
+      color: var(--text-dim);
+    }
+    
+    .test-name {
+      flex: 1;
+      font-size: 14px;
+    }
+    
+    .test-duration {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    
+    .test-error {
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 4px;
+      padding-left: 36px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: var(--text-dim);
+    }
+    
+    .coverage {
+      margin-top: 24px;
+      background: var(--bg-light);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+    
+    .coverage h3 {
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+    
+    .module-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-dark);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .module-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--success);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+    
+    @media (max-width: 640px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧪 自动化测试运行器</h1>
+      <p class="subtitle">AI 短剧创作工作台 v3.1.0 - 功能测试与质量保障</p>
+    </header>
+    
+    <div class="controls">
+      <button class="btn btn-primary" id="runAllBtn" onclick="runAllTests()">
+        🚀 运行全部测试
+      </button>
+      <button class="btn btn-secondary" id="runPerfBtn" onclick="runPerformanceTests()">
+        ⚡ 性能测试
+      </button>
+      <button class="btn btn-secondary" onclick="runSelectedSuites()">
+        ✅ 运行选中
+      </button>
+      <button class="btn btn-secondary" onclick="exportReport()">
+        📥 导出报告
+      </button>
+    </div>
+    
+    <div class="stats" id="stats">
+      <div class="stat-card">
+        <div class="stat-value total" id="totalCount">0</div>
+        <div class="stat-label">总测试数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value passed" id="passedCount">0</div>
+        <div class="stat-label">通过 ✓</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value failed" id="failedCount">0</div>
+        <div class="stat-label">失败 ✗</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value skipped" id="skippedCount">0</div>
+        <div class="stat-label">跳过 ⊘</div>
+      </div>
+    </div>
+    
+    <div class="progress-bar" id="progressBar" style="display: none;">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    
+    <div class="suite-selector" id="suiteSelector">
+      <button class="suite-btn active" data-suite="all">全部</button>
+    </div>
+    
+    <div class="results" id="results">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">点击「运行全部测试」开始测试...</div>
+      </div>
+    </div>
+    
+    <div class="coverage" id="coverage" style="display: none;">
+      <h3>📦 模块覆盖率</h3>
+      <div class="module-list" id="moduleList"></div>
+    </div>
+    
+    <footer>
+      <p>测试框架版本 1.0 | AI 短剧创作工作台</p>
+    </footer>
+  </div>
+  
+  <script>
+    let currentResults = null;
+    let selectedSuites = new Set(['all']);
+    const modules = [
+      { name: '模板市场', file: 'app-template.js', className: 'TemplateLibrary' },
+      { name: '素材库', file: 'app-template.js', className: 'MaterialLibrary' },
+      { name: '云端同步', file: 'app-cloud-sync.js', className: 'CloudSyncManager' },
+      { name: 'API接口', file: 'app-api.js', className: 'ExternalAPI' },
+      { name: '数据导出', file: 'app-api.js', className: 'DataExporter' },
+      { name: '提示词引擎', file: 'app-prompt.js', className: 'PromptEngine' },
+      { name: '协作功能', file: 'app-collab.js', className: 'CollaborationManager' },
+      { name: '视频生成', file: 'app-video.js', className: 'VideoGenerator' },
+      { name: '性能工具', file: 'app-perf.js', className: 'PerformanceUtils' },
+      { name: '移动适配', file: 'app-mobile.js', className: 'MobileAdapter' },
+      { name: '错误处理', file: 'app-error.js', className: 'ErrorManager' },
+      { name: '安全存储', file: 'app-secure.js', className: 'SecureStorageManager' },
+      { name: '智能助手', file: 'app-agent.js', className: 'AgentManager' },
+      { name: 'LLM管理', file: 'app-llm.js', className: 'LLMManager' }
+    ];
+    
+    function initSuiteSelector() {
+      const suites = TestRunnerInstance.getAvailableSuites();
+      const container = document.getElementById('suiteSelector');
+      
+      suites.forEach(suite => {
+        const btn = document.createElement('button');
+        btn.className = 'suite-btn';
+        btn.dataset.suite = suite;
+        btn.textContent = suite;
+        btn.onclick = () => toggleSuite(suite);
+        container.appendChild(btn);
+      });
+    }
+    
+    function toggleSuite(suite) {
+      if (suite === 'all') {
+        selectedSuites.clear();
+        selectedSuites.add('all');
+        document.querySelectorAll('.suite-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.suite === 'all');
+        });
+      } else {
+        selectedSuites.delete('all');
+        document.querySelector('.suite-btn[data-suite="all"]').classList.remove('active');
+        
+        if (selectedSuites.has(suite)) {
+          selectedSuites.delete(suite);
+        } else {
+          selectedSuites.add(suite);
+        }
+        
+        document.querySelectorAll('.suite-btn').forEach(btn => {
+          if (btn.dataset.suite !== 'all') {
+            btn.classList.toggle('active', selectedSuites.has(btn.dataset.suite));
+          }
+        });
+        
+        if (selectedSuites.size === 0) {
+          selectedSuites.add('all');
+          document.querySelector('.suite-btn[data-suite="all"]').classList.add('active');
+        }
+      }
+    }
+    
+    async function runAllTests() {
+      const btn = document.getElementById('runAllBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ 测试中...';
+      
+      document.getElementById('results').innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">正在运行测试，请稍候...</div></div>';
+      document.getElementById('progressBar').style.display = 'block';
+      
+      try {
+        const results = await TestRunnerInstance.runAll();
+        currentResults = results;
+        displayResults(results);
+        updateStats(results);
+        showCoverage();
+      } catch (error) {
+        document.getElementById('results').innerHTML = `<div class="loading"><div class="loading-text" style="color: var(--error);">测试运行出错: ${error.message}</div></div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🚀 运行全部测试';
+        document.getElementById('progressBar').style.display = 'none';
+      }
+    }
+    
+    async function runSelectedSuites() {
+      if (selectedSuites.has('all')) {
+        return runAllTests();
+      }
+      
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '⏳ 测试中...';
+      
+      document.getElementById('progressBar').style.display = 'block';
+      
+      try {
+        let results;
+        for (const suite of selectedSuites) {
+          results = await TestRunnerInstance.runSuite(suite);
+        }
+        currentResults = results;
+        displayResults(results);
+        updateStats(results);
+      } catch (error) {
+        console.error('测试运行出错:', error);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ 运行选中';
+        document.getElementById('progressBar').style.display = 'none';
+      }
+    }
+    
+    async function runPerformanceTests() {
+      const btn = document.getElementById('runPerfBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ 测试中...';
+      
+      try {
+        await PerformanceTestRunner.runSuite();
+        PerformanceTestRunner.printResults();
+        
+        document.getElementById('results').innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">性能测试完成，请查看控制台获取详细结果</div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('性能测试出错:', error);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ 性能测试';
+      }
+    }
+    
+    function displayResults(results) {
+      const container = document.getElementById('results');
+      
+      if (!results.results || results.results.length === 0) {
+        container.innerHTML = '<div class="loading"><div class="loading-text">没有找到测试结果</div></div>';
+        return;
+      }
+      
+      const suites = {};
+      results.results.forEach(r => {
+        if (!suites[r.suite]) {
+          suites[r.suite] = { passed: 0, failed: 0, skipped: 0, tests: [] };
+        }
+        suites[r.suite].tests.push(r);
+        suites[r.suite][r.status]++;
+      });
+      
+      let html = '';
+      for (const [name, suite] of Object.entries(suites)) {
+        const total = suite.tests.length;
+        const passed = suite.passed;
+        const failed = suite.failed;
+        const rate = total > 0 ? Math.round((passed / total) * 100) : 0;
+        
+        html += `
+          <div class="suite">
+            <div class="suite-header" onclick="toggleSuiteTests(this)">
+              <span class="suite-name">
+                ${rate === 100 ? '✓' : rate > 0 ? '◐' : '✗'} ${name}
+              </span>
+              <span class="suite-stats">
+                ${passed}/${total} (${rate}%)
+                ${failed > 0 ? ` <span style="color: var(--error)">✗ ${failed}</span>` : ''}
+              </span>
+            </div>
+            <div class="suite-tests open">
+              ${suite.tests.map(t => `
+                <div class="test">
+                  <div class="test-icon ${t.status}">${t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⊘'}</div>
+                  <span class="test-name">${t.test}</span>
+                  <span class="test-duration">${t.duration}ms</span>
+                </div>
+                ${t.error ? `<div class="test-error">错误: ${t.error}</div>` : ''}
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function toggleSuiteTests(header) {
+      const tests = header.nextElementSibling;
+      tests.classList.toggle('open');
+    }
+    
+    function updateStats(results) {
+      document.getElementById('totalCount').textContent = results.total;
+      document.getElementById('passedCount').textContent = results.passed;
+      document.getElementById('failedCount').textContent = results.failed;
+      document.getElementById('skippedCount').textContent = results.skipped;
+      
+      const passRate = results.passRate;
+      const progressFill = document.getElementById('progressFill');
+      progressFill.style.width = passRate + '%';
+      progressFill.style.background = passRate >= 80 ? 'var(--success)' : passRate >= 50 ? 'var(--warning)' : 'var(--error)';
+    }
+    
+    function showCoverage() {
+      const container = document.getElementById('coverage');
+      const moduleList = document.getElementById('moduleList');
+      
+      moduleList.innerHTML = modules.map(m => `
+        <div class="module-item">
+          <div class="module-icon">✓</div>
+          <span>${m.name}</span>
+        </div>
+      `).join('');
+      
+      container.style.display = 'block';
+    }
+    
+    function exportReport() {
+      if (!currentResults) {
+        alert('请先运行测试');
+        return;
+      }
+      
+      const report = CoverageReporterInstance.generateReport(currentResults);
+      const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `test-report-${new Date().toISOString().slice(0, 10)}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      initSuiteSelector();
+    });
+  </script>
+</body>
+</html>

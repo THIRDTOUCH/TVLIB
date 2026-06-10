@@ -1,0 +1,54 @@
+{
+  "name": "tvlib",
+  "version": "2.0.0",
+  "description": "AI 短剧创作工作台 - 剧本、分镜、角色/场景管理与 ComfyUI/LLM 一站式集成",
+  "main": "index.html",
+  "license": "MIT",
+  "author": "TVLIB Team",
+  "keywords": [
+    "drama",
+    "scriptwriting",
+    "storyboard",
+    "short-video",
+    "comfyui",
+    "llm",
+    "ai",
+    "pwa",
+    "frontend"
+  ],
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000",
+    "clean": "rm -rf __pycache__ .DS_Store",
+    "tree": "find . -type f -not -path './node_modules/*' | sort"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tvlab/TVLIB.git"
+  },
+  "homepage": "https://github.com/Tvlab/TVLIB#readme",
+  "bugs": {
+    "url": "https://github.com/Tvlab/TVLIB/issues"
+  },
+  "files": [
+    "index.html",
+    "style.css",
+    "manifest.json",
+    "service-worker.js",
+    "favicon.svg",
+    "version.json",
+    "js/",
+    "icons/",
+    "docs/"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "browserslist": [
+    "Chrome >= 90",
+    "Firefox >= 88",
+    "Safari >= 14",
+    "Edge >= 90"
+  ]
+}
