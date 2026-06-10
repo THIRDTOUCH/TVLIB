@@ -92,7 +92,7 @@ const CharacterSystem = {
 };
 
 // ========== 2. 场景库管理 ==========
-const SceneLibrary = {
+const _SceneLibrary = {
     /**
      * 标准场景分类（专业软件标准）
      */
@@ -1373,7 +1373,7 @@ const PromptLibrary = {
 
 // 导出到全局
 window.CharacterSystem = CharacterSystem;
-window.SceneLibrary = SceneLibrary;
+window.SceneLibrary = _SceneLibrary;
 window.ScriptFormatter = ScriptFormatter;
 window.BeatSheetSystem = BeatSheetSystem;
 window.AdvancedShotTemplates = AdvancedShotTemplates;

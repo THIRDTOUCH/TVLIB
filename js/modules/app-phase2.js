@@ -303,8 +303,8 @@ const ModalSystem = {
 };
 
 // 添加弹窗动画
-const style = document.createElement('style');
-style.textContent = `
+const _phase2Style = document.createElement('style');
+_phase2Style.textContent = `
 @keyframes modalSlideIn {
     from { transform: translateY(-30px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
@@ -547,7 +547,7 @@ style.textContent = `
     border-radius: 4px;
 }
 `;
-document.head.appendChild(style);
+document.head.appendChild(_phase2Style);
 
 // ===================== Phase 2-3: 加载状态反馈 =====================
 const LoadingManager = {

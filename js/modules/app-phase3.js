@@ -318,7 +318,7 @@ const CharacterLibrary = {
 };
 
 // ===================== Phase 3-2: 场景库管理 =====================
-const SceneLibrary = {
+const SceneLibraryPhase3 = {
     sceneTypes: [
         { value: 'interior', label: '内景', icon: '🏠' },
         { value: 'exterior', label: '外景', icon: '🌳' },
@@ -391,7 +391,7 @@ const SceneLibrary = {
                 <div class="modal-content" style="max-width: 600px;">
                     <div class="modal-header">
                         <h3>${isEdit ? '✏️ 编辑场景' : '➕ 添加场景'}</h3>
-                        <button class="btn-icon modal-close" onclick="SceneLibrary.closeEditor()">×</button>
+                        <button class="btn-icon modal-close" onclick="SceneLibraryPhase3.closeEditor()">×</button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -453,10 +453,10 @@ const SceneLibrary = {
                         </div>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn btn-outline" onclick="SceneLibrary.closeEditor()">取消</button>
-                        <button class="btn btn-secondary" onclick="SceneLibrary.loadPreset()">📚 加载预设</button>
-                        <button class="btn btn-secondary" onclick="SceneLibrary.generatePrompt()">🔮 生成提示词</button>
-                        <button class="btn btn-primary" onclick="SceneLibrary.saveScene(${index})">保存</button>
+                        <button class="btn btn-outline" onclick="SceneLibraryPhase3.closeEditor()">取消</button>
+                        <button class="btn btn-secondary" onclick="SceneLibraryPhase3.loadPreset()">📚 加载预设</button>
+                        <button class="btn btn-secondary" onclick="SceneLibraryPhase3.generatePrompt()">🔮 生成提示词</button>
+                        <button class="btn btn-primary" onclick="SceneLibraryPhase3.saveScene(${index})">保存</button>
                     </div>
                 </div>
             </div>
@@ -671,8 +671,8 @@ const SceneLibrary = {
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-sm btn-secondary" onclick="SceneLibrary.showSceneEditor(${index})">✏️</button>
-                            <button class="btn btn-sm btn-outline" onclick="SceneLibrary.deleteScene(${index})">🗑️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="SceneLibraryPhase3.showSceneEditor(${index})">✏️</button>
+                            <button class="btn btn-sm btn-outline" onclick="SceneLibraryPhase3.deleteScene(${index})">🗑️</button>
                         </div>
                     </div>
                     ${scene.description ? `<div style="font-size: 13px; margin: 12px 0; color: var(--text-dim);">${scene.description}</div>` : ''}
@@ -1179,7 +1179,7 @@ const DataConsistency = {
                     
                     // 重新渲染
                     CharacterLibrary.renderCharacterList();
-                    SceneLibrary.renderSceneList();
+                    SceneLibraryPhase3.renderSceneList();
                     BeatSheet.renderBeatTable();
                     renderShotList(projectData.shots);
                     
@@ -1205,7 +1205,7 @@ function initPhase3() {
     
     // 初始化各子系统
     CharacterLibrary.init();
-    SceneLibrary.init();
+    SceneLibraryPhase3.init();
     BeatSheet.init();
     
     // 扩展 updateProjectStats 函数以包含新数据
@@ -1262,7 +1262,7 @@ function initPhase3() {
 
 // ============ 提供给全局调用的函数别名 ============
 window.addCharacter = () => CharacterLibrary.addCharacter();
-window.addScene = () => SceneLibrary.addScene();
+window.addScene = () => SceneLibraryPhase3.addScene();
 window.changeBeatStructure = () => BeatSheet.changeBeatStructure();
 
 // ============ 启动 Phase 3 ============

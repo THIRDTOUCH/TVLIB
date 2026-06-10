@@ -432,7 +432,7 @@ class SyncManager {
 
 // ==================== 创作素材库 ====================
 
-class MaterialLibrary {
+class SyncMaterialLibrary {
     constructor(db) {
         this.db = db;
     }
@@ -794,7 +794,7 @@ async function initSyncSystem() {
         syncManager = new SyncManager(enhancedDB);
         await syncManager.restoreSession();
         
-        materialLibrary = new MaterialLibrary(enhancedDB);
+        materialLibrary = new SyncMaterialLibrary(enhancedDB);
         bigDataSearch = new BigDataSearch();
         
         console.log('✅ 同步系统初始化完成');

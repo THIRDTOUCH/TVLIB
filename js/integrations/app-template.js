@@ -356,7 +356,7 @@ class TemplateLibrary {
   }
 }
 
-class MaterialLibrary {
+class MaterialLibraryTemplate {
   constructor() {
     this.materials = new Map();
     this._init();
@@ -569,7 +569,7 @@ class MaterialLibrary {
 }
 
 const TemplateManager = new TemplateLibrary();
-const MaterialManager = new MaterialLibrary();
+const MaterialManager = new MaterialLibraryTemplate();
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { TemplateLibrary, MaterialLibrary, TemplateManager, MaterialManager };

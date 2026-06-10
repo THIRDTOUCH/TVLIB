@@ -378,26 +378,113 @@ function randomInt(min, max) {
 }
 
 function showToast(message, type = 'info') {
-    const toast = document.getElementById('toast');
-    toast.className = 'toast ' + type;
-    toast.textContent = message;
-    toast.style.display = 'block';
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 3000);
+    if (!message) return;
+    try {
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            // fallback: 创建容器
+            const fallback = document.createElement('div');
+            fallback.id = 'toast-container';
+            fallback.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 10001; display: flex; flex-direction: column; gap: 8px; pointer-events: none;';
+            document.body.appendChild(fallback);
+        }
+        const target = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#6366f1';
+        toast.style.cssText = `
+            position: relative; padding: 12px 20px;
+            background: ${bgColor}; color: white; border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            font-size: 13px; max-width: 360px; font-weight: 500;
+            pointer-events: auto; animation: slideIn 0.3s ease;
+        `;
+        toast.textContent = message;
+        target.appendChild(toast);
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.3s, transform 0.3s';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(20px)';
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300);
+        }, 3200);
+    } catch (e) {
+        // 最底层降级
+        try { console.log('[Toast]', type, message); } catch (_) {}
+    }
 }
 
 function showLoading(text = 'AI正在创作中...') {
-    document.getElementById('loading-text').textContent = text;
-    document.getElementById('loading-overlay').style.display = 'flex';
+    const overlay = document.getElementById('loading-overlay');
+    const textEl = document.getElementById('loading-text');
+    if (overlay) {
+        if (textEl) textEl.textContent = text;
+        overlay.style.display = 'flex';
+    }
 }
 
 function hideLoading() {
-    document.getElementById('loading-overlay').style.display = 'none';
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'none';
 }
 
 function setStatus(text) {
-    document.getElementById('status-text').textContent = text;
+    try {
+        const statusText = document.getElementById('status-text');
+        if (statusText) {
+            statusText.textContent = text || '';
+            return;
+        }
+        const statusBar = document.getElementById('project-status-bar');
+        if (statusBar) {
+            statusBar.textContent = text || '';
+            return;
+        }
+        // fallback: 不做任何事
+    } catch (e) {
+        // 静默
+    }
+}
+
+// ========== 新手引导 Onboarding ==========
+let currentOnboardingStep = 1;
+
+function showOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    if (!modal) { showToast('初始化中，请稍候...', 'info'); return; }
+    currentOnboardingStep = 1;
+    updateOnboardingUI();
+    modal.style.display = 'flex';
+}
+
+function updateOnboardingUI() {
+    const steps = document.querySelectorAll('.onboarding-step');
+    steps.forEach((step, idx) => {
+        const stepNum = idx + 1;
+        step.classList.toggle('active', stepNum === currentOnboardingStep);
+        step.classList.toggle('completed', stepNum < currentOnboardingStep);
+    });
+    const btn = document.getElementById('onboarding-next');
+    if (btn) {
+        if (currentOnboardingStep >= 4) {
+            btn.textContent = '✨ 开始创建项目 →';
+        } else {
+            btn.textContent = '下一步 →';
+        }
+    }
+}
+
+function nextOnboardingStep() {
+    if (currentOnboardingStep >= 4) {
+        closeOnboarding();
+        createNewProject();
+    } else {
+        currentOnboardingStep++;
+        updateOnboardingUI();
+    }
+}
+
+function closeOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 // ========== 标签页切换 ==========
@@ -2004,89 +2091,110 @@ function loadTemplate(type) {
 }
 
 // ========== 项目保存与加载 ==========
-function saveProject() {
-    projectData.metadata.title = document.getElementById('project-name').value || '未定名项目';
-    projectData.metadata.updatedAt = new Date().toISOString();
+async function saveProject() {
+    try {
+        const titleEl = document.getElementById('project-name');
+        projectData.metadata.title = titleEl ? (titleEl.value || '未定名项目') : '未定名项目';
+        projectData.metadata.updatedAt = new Date().toISOString();
 
-    // 收集大纲结果
-    const outlineResult = document.getElementById('outline-result-content');
-    if (outlineResult && outlineResult.textContent) {
-        projectData.outline = outlineResult.textContent;
+        // 收集大纲结果
+        const outlineResult = document.getElementById('outline-result-content');
+        if (outlineResult && outlineResult.textContent) {
+            projectData.outline = outlineResult.textContent;
+        }
+
+        // 收集剧本结果
+        const scriptResult = document.getElementById('script-result-content');
+        if (scriptResult && scriptResult.textContent) {
+            projectData.script = scriptResult.textContent;
+        }
+
+        // 收集小说结果
+        const novelResult = document.getElementById('novel-result-content');
+        if (novelResult && novelResult.textContent) {
+            projectData.novel = novelResult.textContent;
+        }
+
+        // 保存到 localStorage
+        localStorage.setItem('shortDramaProject', JSON.stringify(projectData));
+
+        // 同时保存到 IndexedDB
+        if (selectedProjectId && window.projectManager && window.projectManager.database) {
+            try {
+                const existing = await window.projectManager.database.getProject(selectedProjectId);
+                if (existing) {
+                    existing.title = projectData.metadata.title;
+                    existing.description = existing.description || '';
+                    existing.outline = projectData.outline || existing.outline || '';
+                    existing.script = projectData.script || existing.script || '';
+                    existing.novel = projectData.novel || existing.novel || '';
+                    existing.updatedAt = new Date().toISOString();
+                    await window.projectManager.database.updateProject(existing);
+                }
+            } catch (dbErr) { console.warn('同步到数据库失败:', dbErr); }
+        }
+
+        showToast('项目已保存！同时生成 JSON 备份文件', 'success');
+
+        // 同时提供下载（可选，注释掉避免打扰）
+        // downloadProjectAsJson();
+    } catch (e) {
+        console.error('保存失败:', e);
+        showToast('保存失败: ' + (e.message || e), 'error');
     }
-
-    // 收集剧本结果
-    const scriptResult = document.getElementById('script-result-content');
-    if (scriptResult && scriptResult.textContent) {
-        projectData.script = scriptResult.textContent;
-    }
-
-    // 收集小说结果
-    const novelResult = document.getElementById('novel-result-content');
-    if (novelResult && novelResult.textContent) {
-        projectData.novel = novelResult.textContent;
-    }
-
-    // 保存到 localStorage
-    localStorage.setItem('shortDramaProject', JSON.stringify(projectData));
-
-    // 同时提供下载
-    downloadProjectAsJson();
-
-    showToast('项目已保存！同时生成 JSON 备份文件', 'success');
 }
 
 function downloadProjectAsJson() {
-    const dataStr = JSON.stringify(projectData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${projectData.metadata.title || '短剧项目'}_${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+        const dataStr = JSON.stringify(projectData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${projectData.metadata.title || '短剧项目'}_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+            if (link.parentNode) document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 function loadProject() {
-    // 创建文件选择器
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const data = JSON.parse(event.target.result);
-                projectData = data;
-                document.getElementById('project-name').value = projectData.metadata.title || '';
-                // 显示结果
-                if (projectData.outline) {
-                    document.getElementById('outline-result').style.display = 'block';
-                    document.getElementById('outline-result-content').textContent = projectData.outline;
+    try {
+        // 创建文件选择器
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const loaded = JSON.parse(ev.target.result);
+                    if (loaded && typeof loaded === 'object') {
+                        // 合并到 projectData
+                        Object.assign(projectData, loaded);
+                        const titleEl = document.getElementById('project-name');
+                        if (titleEl) titleEl.value = projectData.metadata.title || '';
+                        showToast('项目加载成功！', 'success');
+                    } else {
+                        showToast('文件格式不正确', 'error');
+                    }
+                } catch (err) {
+                    showToast('文件解析失败', 'error');
                 }
-                if (projectData.script) {
-                    document.getElementById('script-result').style.display = 'block';
-                    document.getElementById('script-result-content').textContent = projectData.script;
-                }
-                if (projectData.novel) {
-                    document.getElementById('novel-result').style.display = 'block';
-                    document.getElementById('novel-result-content').textContent = projectData.novel;
-                }
-                if (projectData.shots && projectData.shots.length > 0) {
-                    renderShots(projectData.shots);
-                }
-                showToast('项目加载成功！', 'success');
-            } catch (err) {
-                showToast('文件格式错误，请选择正确的项目文件', 'error');
-            }
+            };
+            reader.readAsText(file);
         };
-        reader.readAsText(file);
-    };
-    input.click();
+        input.click();
+    } catch (e) {
+        showToast('加载失败: ' + (e.message || e), 'error');
+    }
 }
 
 // ========== 导出功能 ==========
@@ -2578,7 +2686,8 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const data = JSON.parse(saved);
             if (data && data.metadata && data.metadata.title) {
-                document.getElementById('project-name').value = data.metadata.title;
+                const projectNameEl = document.getElementById('project-name');
+                if (projectNameEl) projectNameEl.value = data.metadata.title;
             }
         } catch (e) {
             // 忽略解析错误
@@ -2588,14 +2697,109 @@ window.addEventListener('DOMContentLoaded', () => {
     setStatus('就绪 - 开始创作您的短剧吧！');
 
     // 点击弹窗外部区域关闭
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
+    try {
+        document.querySelectorAll('.modal-overlay, .modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
         });
-    });
+    } catch (e) { /* 静默 */ }
+
+    // 初始化 LLM 自动重连
+    try { initLLMReconnect(); } catch (e) { console.warn('LLM 重连初始化失败:', e); }
+
+    // 初次加载项目列表（带延迟确保 project-manager 先执行）
+    setTimeout(() => {
+        try { refreshProjectList(); } catch (e) { console.warn('项目列表刷新失败:', e); }
+    }, 500);
 });
+
+// ============================================================
+// LLM 自动重连与降级机制
+// ============================================================
+function initLLMReconnect() {
+    if (typeof window._llmManager === 'undefined') {
+        window._llmManager = {
+            connected: false,
+            retryCount: 0,
+            maxRetries: 5,
+            reconnectTimer: null,
+            lastCheck: 0,
+            providers: ['ollama', 'groq', 'openrouter', 'gemini'],
+            currentProviderIndex: 0
+        };
+    }
+
+    // 定期检查连接状态
+    function checkConnection() {
+        try {
+            // 若已配置了 LLMManager，则尝试做一个健康检查
+            if (typeof LLMManager !== 'undefined' && typeof LLMManager.isConfigured === 'function') {
+                const configured = LLMManager.isConfigured();
+                if (configured) {
+                    window._llmManager.connected = true;
+                    window._llmManager.retryCount = 0;
+                } else {
+                    // 未配置：尝试切换到下一个可用的 provider
+                    window._llmManager.retryCount++;
+                    if (window._llmManager.retryCount >= window._llmManager.maxRetries) {
+                        // 达到最大重试次数，退化为本地模板
+                        window._llmManager.connected = false;
+                        if (window._llmManager.retryCount === window._llmManager.maxRetries) {
+                            console.log('[LLM] 已达到最大重试次数，使用本地模板模式');
+                        }
+                    }
+                }
+            } else {
+                // LLMManager 不可用，使用本地模板模式
+                window._llmManager.connected = false;
+            }
+        } catch (e) {
+            window._llmManager.retryCount++;
+            console.warn('[LLM] 连接检查异常:', e.message);
+        }
+    }
+
+    // 每 30 秒做一次健康检查
+    if (!window._llmManager.reconnectTimer) {
+        window._llmManager.reconnectTimer = setInterval(checkConnection, 30000);
+    }
+
+    // 立即做第一次检查
+    setTimeout(checkConnection, 2000);
+
+    console.log('[LLM] 自动重连与降级机制已启动');
+}
+
+// 智能调用 LLM（带自动降级与重试）
+async function callLLMSmart(prompt, options) {
+    const opts = options || {};
+    const taskType = opts.taskType || 'general';
+    const fallbackFn = opts.fallback || (() => '（本地模式：AI 服务暂不可用，请稍后重试）');
+    const maxAttempts = opts.attempts || 3;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            if (typeof LLMManager !== 'undefined' && LLMManager.isConfigured && LLMManager.isConfigured()) {
+                const result = await LLMManager.sendMessage(prompt, { taskType });
+                if (result && result.content && result.content.trim()) {
+                    return { content: result.content, source: 'llm' };
+                }
+            }
+        } catch (err) {
+            console.warn(`[LLM] 第 ${attempt} 次调用失败:`, err.message);
+            if (attempt < maxAttempts) {
+                // 指数退避
+                await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, attempt)));
+            }
+        }
+    }
+
+    // 降级：使用本地模板
+    return { content: fallbackFn(), source: 'local' };
+}
 
 // ========== 模板故事板加载 ==========
 function loadTemplateToBoard(templateId) {
@@ -2784,51 +2988,180 @@ let selectedProjectId = null;
 
 // 创建新项目
 function createNewProject() {
-    document.getElementById('create-project-modal').style.display = 'flex';
-    document.getElementById('create-project-form').reset();
+    try {
+        const modal = document.getElementById('create-project-modal');
+        if (!modal) {
+            showToast('初始化中，请稍后再试...', 'warning');
+            return;
+        }
+        modal.style.display = 'flex';
+        // 重置表单
+        const form = document.getElementById('create-project-form');
+        if (form) {
+            const titleInput = document.getElementById('new-project-title');
+            if (titleInput) {
+                titleInput.value = '';
+                setTimeout(() => titleInput.focus(), 100);
+            }
+        }
+    } catch (e) {
+        showToast('无法打开创建对话框: ' + (e.message || e), 'error');
+    }
 }
 
 // 关闭创建弹窗
 function closeCreateModal() {
-    document.getElementById('create-project-modal').style.display = 'none';
+    const modal = document.getElementById('create-project-modal');
+    if (modal) modal.style.display = 'none';
 }
 
-// 提交创建项目
-document.getElementById('create-project-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    try {
-        const projectData = {
-            title: document.getElementById('new-project-title').value,
-            description: document.getElementById('new-project-desc').value,
-            genre: document.getElementById('new-project-genre').value,
-            style: document.getElementById('new-project-style').value,
-            duration: document.getElementById('new-project-duration').value,
-            episodes: document.getElementById('new-project-episodes').value
-        };
+// ============================================================
+// 智能对话框/弹窗显示函数（完整的 null 检查）
+// ============================================================
 
-        const project = await projectManager.createProject(projectData);
-        showToast(`项目 "${project.title}" 创建成功！`, 'success');
-        closeCreateModal();
-        refreshProjectList();
-        
-    } catch (error) {
-        showToast('创建项目失败: ' + error.message, 'error');
+function showProjectSettings() {
+    const modal = document.getElementById('settings-modal');
+    if (!modal) {
+        // 兼容模式：创建一个简单的设置弹窗
+        showToast('💡 当前项目名称已在左侧显示，可直接编辑', 'info');
+        return;
     }
+    modal.style.display = 'flex';
+}
+
+function showVersionHistory() {
+    if (!selectedProjectId) {
+        showToast('请先在项目列表中选择一个项目', 'warning');
+        const projectsTab = document.getElementById('tab-projects');
+        if (projectsTab) { switchTab('projects'); refreshProjectList(); }
+        return;
+    }
+    const modal = document.getElementById('history-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        try { showProjectHistory(); } catch (e) { console.warn(e); }
+    } else {
+        showToast('版本历史功能暂不可用', 'warning');
+    }
+}
+
+function showExportPanel() {
+    switchTab('export');
+}
+
+function showKeyboardShortcuts() {
+    const modal = document.getElementById('shortcuts-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        showToast('快捷键：Ctrl+S 保存 | Ctrl+N 新建', 'info');
+    }
+}
+
+function closeHistoryModal() {
+    const modal = document.getElementById('history-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function closeVersionModal() {
+    const modal = document.getElementById('version-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// 提交创建项目（在 DOM 就绪后才绑定，确保表单元素存在）
+window.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('create-project-form');
+    if (!form) {
+        console.warn('create-project-form 元素未找到');
+        return;
+    }
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const titleEl = document.getElementById('new-project-title');
+            if (!titleEl || !titleEl.value.trim()) {
+                showToast('请输入项目名称', 'error');
+                return;
+            }
+            const projectData = {
+                title: titleEl.value.trim(),
+                description: (document.getElementById('new-project-desc') || {}).value || '',
+                genre: (document.getElementById('new-project-genre') || {}).value || '都市情感',
+                style: (document.getElementById('new-project-style') || {}).value || '写实',
+                duration: (document.getElementById('new-project-duration') || {}).value || '',
+                episodes: (document.getElementById('new-project-episodes') || {}).value || ''
+            };
+
+            const project = await projectManager.createProject(projectData);
+            selectedProjectId = project.id;
+
+            // 更新 UI
+            const projTextEl = document.querySelector('#current-project-name .project-name-text');
+            if (projTextEl) projTextEl.textContent = project.title;
+            const projStatusEl = document.querySelector('#current-project-name .project-status');
+            if (projStatusEl) projStatusEl.textContent = '进行中';
+
+            const projectNameEl = document.getElementById('project-name');
+            if (projectNameEl) projectNameEl.value = project.title;
+
+            // 同步类型/风格/时长/集数到大纲面板
+            const genreEl = document.getElementById('genre');
+            if (genreEl) genreEl.value = project.genre;
+            const styleEl = document.getElementById('style');
+            if (styleEl) styleEl.value = project.style;
+            const durationEl = document.getElementById('duration');
+            if (durationEl) durationEl.value = project.duration || '';
+            const episodesEl = document.getElementById('episodes');
+            if (episodesEl) episodesEl.value = project.episodes || '';
+
+            projectData.metadata = projectData.metadata || {};
+            projectData.metadata.title = project.title;
+            projectData.metadata.genre = project.genre;
+            projectData.metadata.style = project.style;
+            projectData.metadata.duration = project.duration;
+            projectData.metadata.episodes = project.episodes;
+
+            showToast(`项目 "${project.title}" 创建成功！`, 'success');
+            closeCreateModal();
+            refreshProjectList();
+            switchTab('outline');
+
+        } catch (error) {
+            console.error('创建项目失败:', error);
+            showToast('创建项目失败: ' + (error.message || error), 'error');
+        }
+    });
 });
 
 // 刷新项目列表
 async function refreshProjectList() {
     try {
+        // 先确保 projectManager 已初始化
+        if (!window.projectManager || !window.projectManager.database || !window.projectManager.database.db) {
+            // 尝试初始化
+            if (window.projectManager && typeof window.projectManager.init === 'function') {
+                try {
+                    await window.projectManager.init();
+                } catch (initErr) {
+                    console.warn('项目管理器初始化失败:', initErr);
+                    showToast('系统初始化中，请刷新页面重试', 'warning');
+                    return;
+                }
+            } else {
+                showToast('项目管理系统尚未就绪，请刷新页面', 'warning');
+                return;
+            }
+        }
+
         const projects = await projectManager.getProjects();
         const list = document.getElementById('project-list');
-        
+
         if (!list) {
             console.log('项目列表元素不存在，跳过刷新');
             return;
         }
-        
-        if (projects.length === 0) {
+
+        if (!projects || projects.length === 0) {
             list.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📁</div>
@@ -2838,32 +3171,33 @@ async function refreshProjectList() {
             `;
             const details = document.getElementById('project-details');
             if (details) details.style.display = 'none';
+            setStatus('就绪 - 点击左侧「+」创建新项目');
             return;
         }
 
         list.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
                 ${projects.map(p => `
-                    <div class="project-card" onclick="selectProject('${p.id}')" 
-                         style="background: ${p.id === selectedProjectId ? '#1e293b' : '#0f172a'}; 
+                    <div class="project-card" onclick="selectProject('${p.id}')"
+                         style="background: ${p.id === selectedProjectId ? 'rgba(99, 102, 241, 0.15)' : '#1e293b'};
                                 border: 2px solid ${p.id === selectedProjectId ? '#6366f1' : '#374151'};
                                 padding: 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">${p.title}</h4>
-                                <p style="font-size: 12px; color: #94a3b8;">${p.description || '暂无描述'}</p>
+                            <div style="flex: 1; min-width: 0;">
+                                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(p.title || '未命名项目')}</h4>
+                                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">${escapeHtml(p.description || '暂无描述')}</p>
                             </div>
-                            <span style="font-size: 10px; padding: 2px 8px; border-radius: 10px; 
+                            <span style="font-size: 10px; padding: 2px 8px; border-radius: 10px; white-space: nowrap;
                                         background: ${getStatusColor(p.status)}; color: white;">
                                 ${getStatusText(p.status)}
                             </span>
                         </div>
-                        <div style="margin-top: 12px; display: flex; gap: 12px; font-size: 11px; color: #64748b;">
-                            <span>${p.genre}</span>
+                        <div style="margin-top: 12px; display: flex; gap: 12px; font-size: 11px; color: #64748b; flex-wrap: wrap;">
+                            <span>${escapeHtml(p.genre || '未分类')}</span>
                             <span>•</span>
-                            <span>${p.duration || '时长待定'}</span>
+                            <span>${escapeHtml(p.duration || '时长待定')}</span>
                             <span>•</span>
-                            <span>${p.episodes || '集数待定'}</span>
+                            <span>${escapeHtml(p.episodes || '集数待定')}</span>
                         </div>
                         <div style="margin-top: 12px; font-size: 10px; color: #4b5563;">
                             更新于 ${formatDate(p.updatedAt)}
@@ -2872,10 +3206,31 @@ async function refreshProjectList() {
                 `).join('')}
             </div>
         `;
-        
+
+        setStatus(`已加载 ${projects.length} 个项目`);
+
     } catch (error) {
-        showToast('加载项目列表失败: ' + error.message, 'error');
+        console.error('加载项目列表失败:', error);
+        const list = document.getElementById('project-list');
+        if (list) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <h3>加载失败</h3>
+                    <p>${escapeHtml(error.message || '请刷新页面重试')}</p>
+                </div>
+            `;
+        }
     }
+}
+
+// HTML 转义辅助函数
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    const str = String(text);
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 // 获取状态颜色
@@ -2916,6 +3271,20 @@ function selectProject(projectId) {
     selectedProjectId = projectId;
     refreshProjectList();
     loadProjectDetails(projectId);
+    // 同步更新当前项目显示
+    const nameEl = document.getElementById('current-project-name');
+    if (nameEl) {
+        const projText = nameEl.querySelector('.project-name-text');
+        if (projText && projectManager && projectManager.database) {
+            projectManager.database.getProject(projectId).then(p => {
+                if (p) {
+                    projText.textContent = p.title || '未命名项目';
+                    const statusEl = nameEl.querySelector('.project-status');
+                    if (statusEl) statusEl.textContent = getStatusText(p.status);
+                }
+            }).catch(() => {});
+        }
+    }
 }
 
 // 加载项目详情

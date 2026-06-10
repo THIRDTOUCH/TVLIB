@@ -50,5 +50,8 @@
     "Firefox >= 88",
     "Safari >= 14",
     "Edge >= 90"
-  ]
+  ],
+  "devDependencies": {
+    "acorn": "^8.16.0"
+  }
 }
