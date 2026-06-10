@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿里云API Key 测试工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        h2 {
+            color: #555;
+            border-left: 4px solid #3b82f6;
+            padding-left: 10px;
+        }
+        .api-type {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .api-type:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        .api-type.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #444;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+            font-family: monospace;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .result.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .tip {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 阿里云API Key 兼容性测试</h1>
+        
+        <div class="info-box">
+            <strong>📖 说明：</strong><br>
+            阿里云有两套不同的AI服务平台，它们使用<strong>不同的API Key和接口地址</strong>：<br><br>
+            1. <strong>灵积 DashScope</strong>（推荐，当前系统使用）- 直接调用千问模型<br>
+            &nbsp;&nbsp;&nbsp;API Key格式：<code>sk-xxxxxxxxxxxxxxxx</code><br>
+            &nbsp;&nbsp;&nbsp;获取地址：https://dashscope.aliyun.com<br><br>
+            2. <strong>百炼 Bailian</strong>（企业级应用开发平台）- 需要先创建应用<br>
+            &nbsp;&nbsp;&nbsp;API Key格式：<code>sk-xxxxxxxxxxxxxxxx</code>（需配合 App_ID）<br>
+            &nbsp;&nbsp;&nbsp;获取地址：https://bailian.console.aliyun.com
+        </div>
+
+        <h2>选择要测试的平台</h2>
+        
+        <div class="api-type selected" onclick="selectType('dashscope')" id="type-dashscope">
+            <strong>✅ 灵积 DashScope</strong>（当前系统已集成）
+            <div class="tip">使用 dashscope.aliyuncs.com 接口，直接调用千问模型</div>
+        </div>
+
+        <div class="api-type" onclick="selectType('bailian')" id="type-bailian">
+            <strong>🏢 百炼 Bailian</strong>（企业级平台）
+            <div class="tip">使用百炼自定义模型/应用，需配置 App_ID</div>
+        </div>
+
+        <div class="api-type" onclick="selectType('bailian-compat')" id="type-bailian-compat">
+            <strong>🔄 百炼 OpenAI兼容模式</strong>
+            <div class="tip">百炼平台的 OpenAI 兼容接口，某些百炼Key适用</div>
+        </div>
+
+        <label>API Key：
+            <input type="password" id="apiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxx" />
+        </label>
+
+        <label>模型名称：
+            <select id="modelName">
+                <option value="qwen-plus">qwen-plus（推荐）</option>
+                <option value="qwen-turbo">qwen-turbo（快速）</option>
+                <option value="qwen-max">qwen-max（最强）</option>
+                <option value="qwen-long">qwen-long（长文本）</option>
+            </select>
+        </label>
+
+        <label>百炼 App ID（仅百炼平台需要）：
+            <input type="text" id="appId" placeholder="例如：1234567890（选填，灵积平台不需要）" />
+        </label>
+
+        <label>测试消息：
+            <textarea id="testMessage">你好，请用一句话介绍你自己。</textarea>
+        </label>
+
+        <button onclick="testAPI()" id="testBtn">🚀 测试连接</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let currentType = 'dashscope';
+
+        function selectType(type) {
+            currentType = type;
+            document.querySelectorAll('.api-type').forEach(el => el.classList.remove('selected'));
+            document.getElementById('type-' + type).classList.add('selected');
+        }
+
+        async function testAPI() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('modelName').value;
+            const appId = document.getElementById('appId').value.trim();
+            const message = document.getElementById('testMessage').value.trim();
+            const resultDiv = document.getElementById('result');
+            const btn = document.getElementById('testBtn');
+
+            if (!apiKey) {
+                resultDiv.innerHTML = '<div class="result error">❌ 请输入 API Key</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 测试中...';
+            resultDiv.innerHTML = '<div class="result">🔄 正在测试连接，请稍候...</div>';
+
+            let url, body, headers;
+            
+            if (currentType === 'dashscope') {
+                url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+                body = {
+                    model: model,
+                    messages: [{ role: 'user', content: message }],
+                    temperature: 0.7,
+                    max_tokens: 500
+                };
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey
+                };
+            } else if (currentType === 'bailian') {
+                url = 'https://bailian.aliyuncs.com/v1/chat/completions';
+                body = {
+                    model: model,
+                    messages: [{ role: 'user', content: message }],
+                    temperature: 0.7,
+                    max_tokens: 500
+                };
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey,
+                    'X-App-Id': appId || ''
+                };
+            } else {
+                // 百炼兼容模式
+                url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+                body = {
+                    model: model,
+                    messages: [{ role: 'user', content: message }],
+                    temperature: 0.7,
+                    max_tokens: 500
+                };
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey
+                };
+            }
+
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                if (response.ok && data.choices && data.choices[0]) {
+                    const reply = data.choices[0].message.content;
+                    resultDiv.innerHTML = `
+<div class="success-box">
+    <strong>✅ 测试成功！</strong> 耗时 ${elapsed}秒<br><br>
+    <strong>平台类型：</strong>${currentType}<br>
+    <strong>模型：</strong>${model}<br>
+    <strong>返回内容：</strong><br>${reply}
+</div>
+<div class="result"><strong>📋 完整返回：</strong>
+${JSON.stringify(data, null, 2)}
+
+<strong>💡 结论：</strong>您的 API Key <strong>可以在系统中使用</strong>，请返回主页配置！</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+<div class="result error">
+    <strong>❌ 测试失败</strong> 耗时 ${elapsed}秒<br>
+    <strong>HTTP状态：</strong>${response.status} ${response.statusText}<br>
+    <strong>错误详情：</strong>
+${JSON.stringify(data, null, 2)}
+
+<strong>🔍 建议排查：</strong>
+1. 确认您的 API Key 是否正确（sk- 开头）
+2. 确认 API Key 对应的平台（灵积 vs 百炼）
+3. 尝试切换不同的"测试平台类型"
+4. 检查账户是否有足够余额/额度
+5. 检查模型名称是否正确
+</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+<div class="result error">
+    <strong>❌ 网络错误：</strong>${error.message}
+
+<strong>🔍 可能原因：</strong>
+1. 浏览器跨域限制（CORS）- 某些环境不允许直接调用
+2. 网络连接问题
+3. API地址错误
+
+<strong>💡 建议：</strong>如果浏览器测试失败，不代表Key无效。可以返回主系统直接尝试使用，主系统有更完善的错误处理机制。
+</div>`;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '🚀 重新测试';
+        }
+    </script>
+</body>
+</html>
