@@ -344,7 +344,13 @@
                             <h2 class="panel-title">📝 第一步：剧本大纲设计</h2>
                             <div class="panel-actions">
                                 <button class="btn btn-sm" onclick="loadTemplate('outline')">📋 模板</button>
+                                <button class="btn btn-sm btn-primary" onclick="startOutlineWithAI()">🤖 AI助手引导</button>
                             </div>
+                        </div>
+
+                        <div class="info-box" id="outline-ai-guide" style="display:none; margin-bottom: 15px;">
+                            <strong>🤖 AI助手正在引导您设计大纲...</strong><br>
+                            <span id="outline-ai-step">请在右侧智能助手对话框中回复，AI将根据您的想法自动填写大纲。</span>
                         </div>
 
                         <div class="form-grid-2">

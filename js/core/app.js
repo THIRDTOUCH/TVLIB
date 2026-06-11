@@ -2090,6 +2090,34 @@ function loadTemplate(type) {
     filterTemplates();
 }
 
+// ========== AI助手引导大纲设计 ==========
+function startOutlineWithAI() {
+    // 显示引导提示
+    const guideBox = document.getElementById('outline-ai-guide');
+    const stepText = document.getElementById('outline-ai-step');
+    if (guideBox) {
+        guideBox.style.display = 'block';
+        if (stepText) stepText.textContent = '请告诉我您想创作什么样的故事，我来帮您填写大纲！';
+    }
+    
+    // 打开智能助手
+    if (window.AgentAssistant) {
+        AgentAssistant.open();
+        setTimeout(() => {
+            AgentAssistant.handleInput('我想创作一个短剧故事，请帮我设计剧本大纲。我需要先告诉你什么信息？');
+        }, 300);
+    }
+}
+
+// 供AI助手回调填写的函数
+function fillOutlineField(field, value) {
+    const el = document.getElementById(field);
+    if (el) {
+        el.value = value;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
 // ========== 项目保存与加载 ==========
 async function saveProject() {
     try {

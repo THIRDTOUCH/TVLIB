@@ -38,6 +38,12 @@
       keywords: ['生成大纲', '做大纲', '写大纲', '剧本大纲', '故事大纲', '大纲生成', '创建大纲'],
       handler: (ctx) => ActionHandlers.generateOutline(ctx)
     },
+    outline_guide: {
+      label: 'AI引导大纲',
+      icon: '🎯',
+      keywords: ['AI引导', '帮我设计大纲', '引导大纲', 'AI助手填', '我想创作', '我要创作', '我想写', '我要写'],
+      handler: (ctx) => ActionHandlers.outlineGuide(ctx)
+    },
     script_generate: {
       label: '生成剧本',
       icon: '📖',
@@ -564,6 +570,22 @@
         buttons: []
       };
     },
+    
+    outlineGuide(ctx, query) {
+      // 引导用户填写大纲
+      const step = ctx.outlineStep || 0;
+      const questions = [
+        '您想创作什么类型的故事？（例如：都市爱情、古装武侠、悬疑推理等）',
+        '故事的主角是谁？能简单描述一下他的性格和背景吗？',
+        '故事的主要冲突或转折点是什么？',
+        '您希望故事传达什么情感或主题？'
+      ];
+      return {
+        title: '🎭 正在引导大纲设计…',
+        body: step < questions.length ? questions[step] : '很好！我来帮您整理这些信息，生成完整的大纲。',
+        buttons: []
+      };
+    },
 
     clearChat() {
       return { title: '🧹 清空对话', body: '已清空对话记录，我们重新开始吧～', buttons: [{ label: '🗑️ 立即清空', primary: true, action: () => AgentUI.clearMessages() }] };
@@ -656,6 +678,34 @@
         </div>
       `;
       document.body.appendChild(panel);
+
+      // 拖动功能
+      const header = panel.querySelector('.agent-panel-header');
+      let isDragging = false, startX, startY, startLeft, startBottom;
+      header.style.cursor = 'grab';
+      header.addEventListener('mousedown', (e) => {
+        if (e.target.closest('button')) return;
+        isDragging = true;
+        header.style.cursor = 'grabbing';
+        const rect = panel.getBoundingClientRect();
+        startX = e.clientX; startY = e.clientY;
+        startLeft = rect.left; startBottom = window.innerHeight - rect.bottom;
+        panel.style.right = 'auto';
+        panel.style.left = startLeft + 'px';
+        panel.style.bottom = startBottom + 'px';
+      });
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX, dy = startY - e.clientY;
+        panel.style.left = (startLeft + dx) + 'px';
+        panel.style.bottom = (startBottom + dy) + 'px';
+      });
+      document.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          header.style.cursor = 'grab';
+        }
+      });
 
       // 事件绑定
       panel.querySelector('#agent-close-btn').addEventListener('click', () => this.togglePanel(false));
@@ -917,26 +967,36 @@
         return;
       }
       const cfg = LLMManager.getConfig();
-      if (!cfg.enabled) {
+      if (!cfg || !cfg.enabled) {
         statusEl.className = 'agent-llm-status offline';
-        statusEl.textContent = '已禁用';
+        statusEl.textContent = '未启用';
         return;
       }
+      const provider = cfg.activeProvider;
+      const apiKey = cfg.apiKeys && cfg.apiKeys[provider];
+      const requiresKey = provider === 'ollama' ? false : !apiKey;
+      
+      if (requiresKey) {
+        statusEl.className = 'agent-llm-status error';
+        statusEl.textContent = '需配置Key';
+        return;
+      }
+      
       // 异步检测连接状态
-      LLMManager.testConnection().then(r => {
+      LLMManager.testConnection(provider).then(r => {
         if (statusEl) {
-          if (r.ok) {
+          if (r && r.ok) {
             statusEl.className = 'agent-llm-status online';
             statusEl.textContent = '已连接';
           } else {
             statusEl.className = 'agent-llm-status error';
-            statusEl.textContent = '未连接';
+            statusEl.textContent = '连接失败';
           }
         }
       }).catch(() => {
         if (statusEl) {
           statusEl.className = 'agent-llm-status error';
-          statusEl.textContent = '未连接';
+          statusEl.textContent = '连接失败';
         }
       });
     },

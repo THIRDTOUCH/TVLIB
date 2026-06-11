@@ -1766,9 +1766,9 @@ img.lazy {
 #agent-panel {
   position: fixed;
   right: 24px;
-  bottom: 100px;
+  bottom: 90px;
   width: min(420px, calc(100vw - 48px));
-  height: min(620px, calc(100vh - 140px));
+  height: min(580px, calc(100vh - 160px));
   background: var(--bg-panel);
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.2);
@@ -1781,6 +1781,7 @@ img.lazy {
   transition: transform .25s ease, opacity .25s ease;
   overflow: hidden;
   border: 1px solid var(--border);
+  touch-action: none;
 }
 #agent-panel.open {
   transform: translateY(0) scale(1);
@@ -1902,9 +1903,25 @@ body.light-theme .agent-input input { background: white; }
 
 /* 移动端适配 */
 @media (max-width: 640px) {
-  #agent-panel { right: 10px; left: 10px; bottom: 90px; width: auto; height: 75vh; max-width: none; }
+  #agent-panel { 
+    right: 10px; 
+    left: 10px; 
+    bottom: 80px; 
+    width: auto; 
+    height: 70vh; 
+    max-width: none; 
+  }
   #agent-fab { right: 16px; bottom: 16px; width: 56px; height: 56px; }
   .agent-fab-inner { font-size: 24px; }
+}
+
+/* 对话框底部输入区固定显示 */
+.agent-input {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-dark);
+  padding: 10px 12px;
+  gap: 8px;
 }
 
 /* ============================================================
