@@ -424,131 +424,40 @@
     openBeatSheet() { switchTab('beat'); return { title: '🥁 已打开节拍表', body: '', buttons: [] }; },
     openCharacterLib() { switchTab('character'); return { title: '🧑‍🎤 已打开角色库', body: '', buttons: [] }; },
 
-    openSceneLib() {
-      return { title: '🏞️ 场景库', body: '场景库帮助你沉淀可复用的场景设定（时间、地点、氛围、光线）。', buttons: [{ label: '🏞️ 打开场景库', primary: true, action: () => switchTab('scene') }] };
-    },
+    openSceneLib() { switchTab('scene'); return { title: '🏞️ 已打开场景库', body: '', buttons: [] }; },
 
     exportData() {
-      return {
-        title: '💾 导出全部数据',
-        body: '导出当前所有项目/设置/备份为一份 JSON 文件，可用于迁移或备份。',
-        buttons: [
-          { label: '📦 导出完整数据', primary: true, action: () => { if (window.UpdateManager && UpdateManager.exportFullData) UpdateManager.exportFullData(); else window.exportAllData && window.exportAllData(); } },
-          { label: '📋 查看版本面板', action: () => { if (window.UpdateManager && UpdateManager.showVersionPanel) UpdateManager.showVersionPanel(); } }
-        ]
-      };
+      if (window.UpdateManager && UpdateManager.exportFullData) UpdateManager.exportFullData();
+      else if (window.exportAllData) window.exportAllData();
+      return { title: '💾 正在导出...', body: '', buttons: [] };
     },
 
     restoreData() {
-      return {
-        title: '♻️ 恢复数据',
-        body: '导入之前的 JSON 文件（会先自动备份当前数据）。',
-        buttons: [{ label: '📂 进入版本/备份面板', primary: true, action: () => { if (window.UpdateManager && UpdateManager.showVersionPanel) UpdateManager.showVersionPanel(); } }]
-      };
+      if (window.UpdateManager && UpdateManager.showVersionPanel) UpdateManager.showVersionPanel();
+      return { title: '♻️ 正在打开...', body: '', buttons: [] };
     },
 
     checkUpdate() {
-      return {
-        title: '🔄 检查更新',
-        body: '当前版本：' + (window.UpdateManager && UpdateManager.currentVersion || '3.1.0') + '<br>点击下方触发更新检测。',
-        buttons: [{ label: '🔍 立即检查更新', primary: true, action: () => { if (window.UpdateManager && UpdateManager.checkForUpdates) UpdateManager.checkForUpdates(); } }]
-      };
+      if (window.UpdateManager && UpdateManager.checkForUpdates) UpdateManager.checkForUpdates();
+      return { title: '🔄 正在检查...', body: '', buttons: [] };
     },
 
     showFreeAIGuide() {
-      return {
-        title: '🤖 免费使用 AI 大模型指南',
-        body:
-          '<div style="margin-bottom:14px;">以下是三种免费使用 AI 的方式，按推荐程度排序：</div>' +
-
-          '<div style="background:rgba(16,185,129,0.08);border:2px solid rgba(16,185,129,0.3);border-radius:10px;padding:14px;margin-bottom:12px;">' +
-          '<div style="font-weight:bold;color:#10b981;margin-bottom:6px;">🏠 推荐 #1：Ollama（本地，完全免费无限制）</div>' +
-          '<div style="font-size:12px;color:var(--text-dim);line-height:1.6;margin-bottom:8px;">在电脑上安装 Ollama 后直接使用，无需注册账号，完全免费且速度最快。</div>' +
-          '<div style="font-size:12px;margin-bottom:8px;">安装步骤：</div>' +
-          '<div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:8px;">' +
-          '1. 访问 <a href="https://ollama.com" target="_blank" style="color:#10b981;">ollama.com</a> 下载安装<br>' +
-          '2. 打开终端，运行：<code style="background:#1e293b;padding:2px 8px;border-radius:4px;color:#10b981;">ollama run llama3.3</code><br>' +
-          '3. 运行后保持 Ollama 开启，返回这里点"打开 AI 设置"' +
-          '</div>' +
-          '<button onclick="LLMManager.showSettings()" style="padding:8px 16px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px;">⚙️ 打开 AI 设置</button>' +
-          '</div>' +
-
-          '<div style="background:rgba(249,115,22,0.08);border:2px solid rgba(249,115,22,0.3);border-radius:10px;padding:14px;margin-bottom:12px;">' +
-          '<div style="font-weight:bold;color:#f97316;margin-bottom:6px;">⚡ 推荐 #2：Groq（免费云服务，无需信用卡）</div>' +
-          '<div style="font-size:12px;color:var(--text-dim);line-height:1.6;margin-bottom:8px;">Llama 3.3 70B 完全免费，速度极快（60+ token/s），无需信用卡，注册即用。</div>' +
-          '<div style="font-size:12px;margin-bottom:8px;">注册步骤：</div>' +
-          '<div style="font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:8px;">' +
-          '1. 访问 <a href="https://groq.com" target="_blank" style="color:#f97316;">groq.com</a> 点击 Sign Up<br>' +
-          '2. 用 Google 或邮箱注册（无需信用卡）<br>' +
-          '3. 进入 Console → API Keys → 创建 Key<br>' +
-          '4. 复制 Key，粘贴到 AI 设置中' +
-          '</div>' +
-          '<button onclick="LLMManager.showSettings()" style="padding:8px 16px;background:#f97316;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px;">⚙️ 打开 AI 设置</button>' +
-          '</div>' +
-
-          '<div style="background:rgba(99,102,241,0.08);border:2px solid rgba(99,102,241,0.3);border-radius:10px;padding:14px;">' +
-          '<div style="font-weight:bold;color:#818cf8;margin-bottom:6px;">🌐 推荐 #3：OpenRouter（聚合多个免费模型）</div>' +
-          '<div style="font-size:12px;color:var(--text-dim);line-height:1.6;margin-bottom:8px;">聚合多个模型的免费配额（Claude Haiku / Qwen / DeepSeek 等），注册即送免费额度。</div>' +
-          '<div style="font-size:12px;">' +
-          '注册地址：<a href="https://openrouter.ai" target="_blank" style="color:#818cf8;">openrouter.ai</a>' +
-          '</div>' +
-          '</div>'
-        ,
-        buttons: [
-          { label: '⚙️ 打开 AI 设置', primary: true, action: () => { if (window.LLMManager) LLMManager.showSettings(); } },
-          { label: '🔍 自动检测可用模型', action: () => { if (window.LLMManager) LLMManager.testConnection().then(r => { showToast(r.ok ? '✅ 已连接成功' : '⚠️ ' + r.message, r.ok ? 'success' : 'warning'); }); } }
-        ]
-      };
+      if (window.LLMManager) LLMManager.showSettings();
+      return { title: '⚙️ 打开AI设置', body: '', buttons: [] };
     },
 
     toggleTheme() {
-      return {
-        title: '🌓 主题切换',
-        body: '点击下方按钮可在浅/深色之间切换（若系统支持）。',
-        buttons: [
-          {
-            label: '🌓 切换深色/浅色', primary: true,
-            action: () => {
-              document.body.classList.toggle('light-theme');
-              showToast('🌓 主题已切换', 'info');
-            }
-          }
-        ]
-      };
+      document.body.classList.toggle('light-theme');
+      showToast(document.body.classList.contains('light-theme') ? '☀️ 浅色模式' : '🌙 深色模式', 'info');
+      return { title: '', body: '', buttons: [] };
     },
 
     showHelp() {
-      const quick = [
-        '🎯 "搜索 母亲" → 全站搜关键词',
-        '✨ "新建一个短剧项目"',
-        '🧭 "生成大纲"',
-        '🎬 "再加 3 个分镜"',
-        '💡 "帮我看看这个剧本哪里要改"',
-        '📋 "列出我的项目"',
-        '💾 "备份我的数据"',
-        '🔄 "检查更新"',
-        '🤖 "如何免费使用 AI"'
-      ];
       return {
-        title: '📘 我能帮你做什么',
-        body:
-          '<div style="margin-bottom:12px;">你可以直接用自然语言跟我聊天，下面是常用指令：</div>' +
-          '<div style="background:var(--bg-dark);border-radius:8px;padding:10px;margin-bottom:12px;">' +
-          quick.map((q) => `<div style="padding:3px 0;">· ${q}</div>`).join('') +
-          '</div>' +
-          '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:12px;">' +
-          '<div style="font-weight:bold;color:#10b981;margin-bottom:6px;">🤖 免费使用 AI 大模型</div>' +
-          '<div style="font-size:12px;color:var(--text-dim);line-height:1.6;">' +
-          '· <strong>完全免费</strong>：电脑安装 Ollama（ollama.com）后即可使用，无需注册账号<br>' +
-          '· <strong>免费云服务</strong>：Groq（groq.com）注册后免费 Key 无需信用卡<br>' +
-          '· 配置方式：点我 → 右上角 ⚙️ 打开 AI 设置' +
-          '</div>' +
-          '</div>' +
-          '<div style="margin-top:10px;font-size:12px;color:var(--text-dim);">💡 所有建议操作都需你<b>手动点击按钮</b>才会执行，不会自动改你的数据。</div>',
-        buttons: [
-          { label: '⚙️ 打开 AI 设置', primary: true, action: () => { if (window.LLMManager) LLMManager.showSettings(); } },
-          { label: '🧠 试试"随机一条建议"', action: () => { const r = quick[Math.floor(Math.random() * quick.length)]; AgentUI.pushUser(r); AgentUI.handleInput(r); } }
-        ]
+        title: '🤖 我能帮您做什么？',
+        body: '✨"新建项目" - 创建新项目\n📋"列出项目" - 查看项目\n🔎"搜索XXX" - 搜索\n🧭"生成大纲" - AI生成大纲\n📖"生成剧本" - AI生成剧本\n🎬"添加分镜" - AI生成分镜\n⚙️"打开角色库" - 跳转页面\n💾"导出数据" - 备份\n\n直接告诉我您想做什么！',
+        buttons: []
       };
     },
 
