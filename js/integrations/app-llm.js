@@ -43,15 +43,16 @@
       icon: '🏠',
       free: true,
       requiresKey: false,
-      defaultModel: 'llama3.3',
+      defaultModel: 'gemma3:1b',
       description: '本机部署，完全免费，最快，无需网络',
-      setup: '请先在电脑安装 Ollama：ollama.com，然后运行 "ollama run llama3.3"',
+      setup: '请先在电脑安装 Ollama：ollama.com，然后运行 "ollama run gemma3:1b"',
       color: '#10b981',
       docs: [
-        { label: 'Llama 3.3 70B', model: 'llama3.3', desc: '最新开源大模型，能力最强' },
+        { label: 'Gemma 3 (1B)', model: 'gemma3:1b', desc: 'Google 开源，轻量快速，低配置电脑可用' },
+        { label: 'Gemma 3 (4B)', model: 'gemma3', desc: 'Google 开源，质量更好' },
+        { label: 'Llama 3.3', model: 'llama3.3', desc: '最新开源大模型，能力最强' },
         { label: 'Qwen 2.5', model: 'qwen2.5', desc: '阿里开源，中文优秀' },
-        { label: 'DeepSeek V3', model: 'deepseek-v3', desc: '国产开源，性价比高' },
-        { label: 'Gemma 3', model: 'gemma3', desc: 'Google 开源，轻量快速' }
+        { label: 'DeepSeek V3', model: 'deepseek-v3', desc: '国产开源，性价比高' }
       ],
       apiBase: () => localStorage.getItem(CONFIG_KEYS.ollamaHost) || 'http://localhost:11434',
       buildRequest: (model, messages) => ({
