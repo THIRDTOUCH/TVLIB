@@ -2090,32 +2090,138 @@ function loadTemplate(type) {
     filterTemplates();
 }
 
-// ========== AI助手引导大纲设计 ==========
-function startOutlineWithAI() {
-    // 显示引导提示
-    const guideBox = document.getElementById('outline-ai-guide');
-    const stepText = document.getElementById('outline-ai-step');
-    if (guideBox) {
-        guideBox.style.display = 'block';
-        if (stepText) stepText.textContent = '请告诉我您想创作什么样的故事，我来帮您填写大纲！';
+// ========== AI主导大纲生成 ==========
+
+// 一键从想法生成大纲
+async function generateOutlineFromIdea() {
+    const idea = document.getElementById('outline-idea')?.value?.trim();
+    const tags = document.getElementById('tags-input')?.value?.trim() || '';
+    const outlineEl = document.getElementById('outline-main');
+    const btn = document.getElementById('btn-generate-outline');
+    
+    if (!idea) {
+        showToast('请先描述您的故事想法', 'warning');
+        document.getElementById('outline-idea')?.focus();
+        return;
     }
     
-    // 打开智能助手
-    if (window.AgentAssistant) {
-        AgentAssistant.open();
-        setTimeout(() => {
-            AgentAssistant.handleInput('我想创作一个短剧故事，请帮我设计剧本大纲。我需要先告诉你什么信息？');
-        }, 300);
+    // 显示加载状态
+    if (btn) {
+        btn.querySelector('.btn-text').style.display = 'none';
+        btn.querySelector('.btn-loading').style.display = 'inline';
+        btn.disabled = true;
+    }
+    
+    try {
+        let prompt = `请为以下短剧创意生成一个完整的大纲：
+
+创意：${idea}
+${tags ? '风格标签：' + tags : ''}
+
+请生成包含以下内容的大纲：
+1. 故事类型（可以混合多种类型）
+2. 主要角色设定（2-4个角色）
+3. 开场钩子（30秒内抓住观众）
+4. 主要冲突和发展
+5. 关键转折点（2-3个）
+6. 结局和情感落点
+
+请用简洁有力的方式呈现，适合短视频平台播出。`;
+        
+        let result = '';
+        
+        if (window.LLMManager) {
+            try {
+                result = await LLMManager.sendMessage(prompt, { taskType: 'outline_generate', maxTokens: 2000 });
+            } catch (e) {
+                console.log('LLM调用失败，使用备用方案', e);
+                // 备用：直接显示提示
+                result = `【${idea}】
+
+📌 故事类型：${tags || '待定（AI推荐：爱情+喜剧+逆袭）'}
+
+👥 角色设定：
+• 主角：待定（建议有鲜明性格特征）
+• 配角：待定
+• 反派/对手：待定
+
+🎬 开场钩子：
+（建议30秒内制造悬念或冲突）
+
+📖 故事梗概：
+（待AI生成完整内容）
+
+🔄 关键转折：
+1. 
+2. 
+3. 
+
+💡 情感落点：
+（故事想要传达的核心情感）`;
+            }
+        } else {
+            result = `【${idea}】
+
+📌 故事类型：${tags || '待定（建议混合多种类型增加看点）'}
+
+请配置AI后点击"🚀 AI一键生成大纲"获得完整内容！
+
+💡 小提示：您可以先手动填写大纲，AI会在配置好后帮您优化。`;
+        }
+        
+        // 填入大纲框
+        if (outlineEl) {
+            outlineEl.value = result;
+            outlineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        showToast('✅ 大纲已生成！', 'success');
+        
+    } catch (e) {
+        showToast('生成失败：' + e.message, 'error');
+    } finally {
+        if (btn) {
+            btn.querySelector('.btn-text').style.display = 'inline';
+            btn.querySelector('.btn-loading').style.display = 'none';
+            btn.disabled = false;
+        }
     }
 }
 
-// 供AI助手回调填写的函数
-function fillOutlineField(field, value) {
-    const el = document.getElementById(field);
-    if (el) {
-        el.value = value;
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+// 添加风格标签
+function addTag(tag) {
+    const input = document.getElementById('tags-input');
+    if (!input) return;
+    
+    const current = input.value.trim();
+    const tags = current ? current.split(/[,，]/).map(t => t.trim()).filter(t => t) : [];
+    
+    if (!tags.includes(tag)) {
+        tags.push(tag);
+        input.value = tags.join('，');
     }
+    
+    input.focus();
+}
+
+// 继续到剧本页
+function continueToScript() {
+    const outline = document.getElementById('outline-main')?.value?.trim();
+    
+    if (!outline) {
+        showToast('请先生成或填写大纲', 'warning');
+        return;
+    }
+    
+    // 保存大纲到剧本输入框
+    const scriptInput = document.getElementById('script-input');
+    if (scriptInput) {
+        scriptInput.value = outline;
+    }
+    
+    // 切换到剧本页
+    switchTab('script');
+    showToast('大纲已带入剧本页，可以继续创作了！', 'success');
 }
 
 // ========== 项目保存与加载 ==========

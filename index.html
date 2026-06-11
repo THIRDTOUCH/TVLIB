@@ -341,93 +341,64 @@
                 <section id="tab-outline" class="tab-content active">
                     <div class="panel">
                         <div class="panel-header">
-                            <h2 class="panel-title">📝 第一步：剧本大纲设计</h2>
+                            <h2 class="panel-title">📝 剧本大纲设计</h2>
                             <div class="panel-actions">
                                 <button class="btn btn-sm" onclick="loadTemplate('outline')">📋 模板</button>
-                                <button class="btn btn-sm btn-primary" onclick="startOutlineWithAI()">🤖 AI助手引导</button>
                             </div>
                         </div>
 
-                        <div class="info-box" id="outline-ai-guide" style="display:none; margin-bottom: 15px;">
-                            <strong>🤖 AI助手正在引导您设计大纲...</strong><br>
-                            <span id="outline-ai-step">请在右侧智能助手对话框中回复，AI将根据您的想法自动填写大纲。</span>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>短剧类型</label>
-                                <select id="genre">
-                                    <option value="都市情感">都市情感</option>
-                                    <option value="古装仙侠">古装仙侠</option>
-                                    <option value="悬疑推理">悬疑推理</option>
-                                    <option value="喜剧搞笑">喜剧搞笑</option>
-                                    <option value="励志成长">励志成长</option>
-                                    <option value="科幻奇幻">科幻奇幻</option>
-                                    <option value="豪门恩怨">豪门恩怨</option>
-                                    <option value="青春校园">青春校园</option>
-                                    <option value="穿越重生">穿越重生</option>
-                                    <option value="家庭伦理">家庭伦理</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>时长（分钟）</label>
-                                <input type="text" id="duration" placeholder="如：10分钟">
-                            </div>
-                            <div class="form-group">
-                                <label>风格</label>
-                                <select id="style">
-                                    <option value="写实">写实</option>
-                                    <option value="浪漫">浪漫</option>
-                                    <option value="文艺">文艺</option>
-                                    <option value="轻松">轻松</option>
-                                    <option value="暗黑">暗黑</option>
-                                    <option value="奇幻">奇幻</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>集数</label>
-                                <input type="text" id="episodes" placeholder="如：12集">
-                            </div>
+                        <!-- 核心：自由描述区 -->
+                        <div class="outline-hero">
+                            <div class="hero-icon">💡</div>
+                            <h3>告诉我你想创作的故事</h3>
+                            <p>用你自己的话描述想法，AI会帮你生成完整大纲</p>
                         </div>
 
                         <div class="form-group">
-                            <label>核心主题 / 故事简介</label>
-                            <textarea id="theme" rows="4" placeholder="请描述故事的核心主题、主要情节和情感走向..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>主要角色设定（每行一个）</label>
-                            <textarea id="characters" rows="3" placeholder="如：张三 - 28岁，霸道总裁，外冷内热&#10;李四 - 25岁，职场新人，善良坚强"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>情节节点（起承转合）</label>
-                            <div class="plot-nodes">
-                                <div class="plot-node">
-                                    <span class="node-label">起</span>
-                                    <textarea id="plot-start" rows="2" placeholder="故事开端，建置人物和世界观"></textarea>
-                                </div>
-                                <div class="plot-node">
-                                    <span class="node-label">承</span>
-                                    <textarea id="plot-develop" rows="2" placeholder="情节发展，冲突渐起"></textarea>
-                                </div>
-                                <div class="plot-node">
-                                    <span class="node-label">转</span>
-                                    <textarea id="plot-twist" rows="2" placeholder="关键转折，高潮来临"></textarea>
-                                </div>
-                                <div class="plot-node">
-                                    <span class="node-label">合</span>
-                                    <textarea id="plot-end" rows="2" placeholder="结局收尾，情感升华"></textarea>
-                                </div>
-                            </div>
+                            <label>💭 你的故事想法</label>
+                            <textarea id="outline-idea" rows="4" placeholder="例如：我想写一个关于姐妹互换身份进入豪门的喜剧，最后发现真爱比金钱更重要。或者：一个穿越到古代的现代女孩，用科技知识改变了历史..."></textarea>
                         </div>
 
                         <div class="action-row">
-                            <button class="btn btn-primary btn-large" id="btn-generate-outline" onclick="generateOutline()">
-                                <span class="btn-text">✨ AI生成完整大纲</span>
-                                <span class="btn-loading" style="display: none;">🤖 生成中...</span>
+                            <button class="btn btn-primary btn-large" id="btn-generate-outline" onclick="generateOutlineFromIdea()">
+                                <span class="btn-text">🚀 AI一键生成大纲</span>
+                                <span class="btn-loading" style="display: none;">🤖 AI创作中...</span>
                             </button>
+                        </div>
+
+                        <div class="divider-text">— 或者手动填写（全部可选）—</div>
+
+                        <!-- 自由标签区 - 可多选 -->
+                        <div class="form-group">
+                            <label>🏷️ 混搭风格（用逗号分隔，不填也没关系）</label>
+                            <input type="text" id="tags-input" placeholder="例如：悬疑, 喜剧, 爱情, 穿越  （AI会自动搭配）">
+                            <div class="tag-suggestions">
+                                <span class="tag-chip" onclick="addTag('悬疑')">悬疑</span>
+                                <span class="tag-chip" onclick="addTag('喜剧')">喜剧</span>
+                                <span class="tag-chip" onclick="addTag('爱情')">爱情</span>
+                                <span class="tag-chip" onclick="addTag('科幻')">科幻</span>
+                                <span class="tag-chip" onclick="addTag('奇幻')">奇幻</span>
+                                <span class="tag-chip" onclick="addTag('恐怖')">恐怖</span>
+                                <span class="tag-chip" onclick="addTag('励志')">励志</span>
+                                <span class="tag-chip" onclick="addTag('虐心')">虐心</span>
+                                <span class="tag-chip" onclick="addTag('甜宠')">甜宠</span>
+                                <span class="tag-chip" onclick="addTag('职场')">职场</span>
+                                <span class="tag-chip" onclick="addTag('校园')">校园</span>
+                                <span class="tag-chip" onclick="addTag('穿越')">穿越</span>
+                                <span class="tag-chip" onclick="addTag('重生')">重生</span>
+                                <span class="tag-chip" onclick="addTag('复仇')">复仇</span>
+                                <span class="tag-chip" onclick="addTag('逆袭')">逆袭</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>📖 故事大纲（AI生成后可在此修改）</label>
+                            <textarea id="outline-main" rows="10" placeholder="AI生成的大纲会显示在这里，也可以自己编写..."></textarea>
+                        </div>
+
+                        <div class="action-row">
                             <button class="btn btn-secondary" onclick="optimizeOutline()">🔧 优化大纲</button>
+                            <button class="btn btn-primary" onclick="continueToScript()">📝 继续写剧本 →</button>
                         </div>
 
                         <div class="result-area" id="outline-result" style="display:none;">

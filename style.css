@@ -690,6 +690,78 @@ body {
     padding-top: 44px;
 }
 
+/* ========== AI主导大纲设计 ========== */
+.outline-hero {
+    text-align: center;
+    padding: 32px 20px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.outline-hero .hero-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.outline-hero h3 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.outline-hero p {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+.divider-text {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 20px 0;
+    position: relative;
+}
+
+.divider-text::before,
+.divider-text::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background: var(--border);
+}
+
+.divider-text::before { left: 0; }
+.divider-text::after { right: 0; }
+
+/* 风格标签 */
+.tag-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.tag-chip {
+    padding: 6px 14px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag-chip:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
 /* ========== 分镜网格 ========== */
 .shots-grid {
     display: grid;
