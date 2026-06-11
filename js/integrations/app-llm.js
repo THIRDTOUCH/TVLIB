@@ -534,7 +534,7 @@ ${question}
         }
 
         // 其余 Provider 用实际 API 调用测试
-        const key = this.getAPIKey(p);
+        const key = await this.getAPIKey(p);
         if (PROVIDERS[p].requiresKey && !key) throw new Error('需要先填写 API Key');
 
         const headers = typeof req.headers === 'function' ? req.headers(key) : req.headers;
@@ -570,8 +570,11 @@ ${question}
       const p = PROVIDERS[provider];
       if (!p) throw new Error('无效的 Provider');
 
+      // ✅ 修复：await 异步 API Key
+      const apiKey = await this.getAPIKey(provider);
+      
       // 检查 API Key
-      if (p.requiresKey && !this.getAPIKey(provider)) {
+      if (p.requiresKey && !apiKey) {
         throw new Error(`${p.name} 需要配置 API Key，请先在设置中填写`);
       }
 
@@ -582,19 +585,16 @@ ${question}
       let userContent = '';
 
       if (window.PromptManager) {
-        // 使用高级提示词引擎
         try {
           const builtPrompt = PromptManager.buildPrompt(taskType, prompt);
           systemPrompt = '你是一位专业的短剧创作助手，擅长创作大纲、剧本和分镜脚本。';
           userContent = builtPrompt;
         } catch (e) {
-          // 回退到简单模板
           const template = PROMPT_TEMPLATES[taskType];
           systemPrompt = system || (template ? template.system : '');
           userContent = typeof prompt === 'string' ? prompt : (template ? template.user(prompt) : JSON.stringify(prompt));
         }
       } else {
-        // 回退到简单模板
         const template = PROMPT_TEMPLATES[taskType];
         systemPrompt = system || (template ? template.system : '');
         userContent = typeof prompt === 'string' ? prompt : (template ? template.user(prompt) : JSON.stringify(prompt));
@@ -608,8 +608,9 @@ ${question}
       try {
         const req = p.buildRequest(model, messages);
 
+        // ✅ 修复：使用实际的 apiKey 而不是 Promise
         const headers = typeof req.headers === 'function'
-          ? req.headers(this.getAPIKey(provider))
+          ? req.headers(apiKey)
           : req.headers;
 
         const rawBody = typeof req.body === 'function'
@@ -653,13 +654,11 @@ ${question}
               let text = '';
               let parsed = null;
 
-              // 通用 OpenAI 兼容格式 (Groq, OpenRouter, Cohere, HF)
               try {
                 parsed = JSON.parse(data);
                 text = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text || '';
               } catch {}
 
-              // Gemini 格式
               if (!text && data.startsWith('{')) {
                 try {
                   parsed = JSON.parse(data);
@@ -681,14 +680,13 @@ ${question}
       } catch (err) {
         this._notify('error', { provider, error: err.message });
 
-        // 自动降级到免费 provider
         if (localStorage.getItem(CONFIG_KEYS.autoFallback) !== 'false') {
           const fallback = this._findFallbackProvider(provider);
           if (fallback && fallback !== provider) {
             console.log(`🔄 自动降级到 ${fallback}`);
             this._currentProvider = fallback;
             localStorage.setItem(CONFIG_KEYS.activeProvider, fallback);
-            return this.sendMessage(prompt, options); // 递归重试
+            return this.sendMessage(prompt, options);
           }
         }
 

@@ -958,7 +958,7 @@
       });
     },
 
-    _updateLLMStatus() {
+    async _updateLLMStatus() {
       const statusEl = document.getElementById('agent-llm-status');
       if (!statusEl) return;
       if (!window.LLMManager) {
@@ -972,33 +972,19 @@
         statusEl.textContent = '未启用';
         return;
       }
-      const provider = cfg.activeProvider;
-      const apiKey = cfg.apiKeys && cfg.apiKeys[provider];
-      const requiresKey = provider === 'ollama' ? false : !apiKey;
-      
-      if (requiresKey) {
+
+      statusEl.className = 'agent-llm-status error';
+      statusEl.textContent = '检测中…';
+
+      // 使用 testConnection 统一检测（它会正确检查 API Key）
+      const r = await LLMManager.testConnection(cfg.activeProvider).catch(() => ({ ok: false, message: '检测失败' }));
+      if (r && r.ok) {
+        statusEl.className = 'agent-llm-status online';
+        statusEl.textContent = '已连接';
+      } else {
         statusEl.className = 'agent-llm-status error';
-        statusEl.textContent = '需配置Key';
-        return;
+        statusEl.textContent = '需配置';
       }
-      
-      // 异步检测连接状态
-      LLMManager.testConnection(provider).then(r => {
-        if (statusEl) {
-          if (r && r.ok) {
-            statusEl.className = 'agent-llm-status online';
-            statusEl.textContent = '已连接';
-          } else {
-            statusEl.className = 'agent-llm-status error';
-            statusEl.textContent = '连接失败';
-          }
-        }
-      }).catch(() => {
-        if (statusEl) {
-          statusEl.className = 'agent-llm-status error';
-          statusEl.textContent = '连接失败';
-        }
-      });
     },
 
     persist() {
