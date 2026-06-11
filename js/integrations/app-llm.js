@@ -518,24 +518,30 @@ ${question}
     // ---------- 连接测试 ----------
     async testConnection(providerId) {
       const p = providerId || this._currentProvider;
-      const model = this.getModel(p);
-      const req = PROVIDERS[p]?.buildRequest(model, [
-        { role: 'user', content: 'Hi' }
-      ]);
-      if (!req) throw new Error('不支持的 Provider: ' + p);
+      if (!p) return { ok: false, message: '❌ 未选择 Provider' };
+      
+      const providerDef = PROVIDERS[p];
+      if (!providerDef) return { ok: false, message: `❌ 不支持的 Provider: ${p}` };
 
       try {
+        // Ollama 特殊处理：本地服务，不需要 Key
         if (p === 'ollama') {
-          // Ollama 直接 GET 健康检测
-          const base = PROVIDERS.ollama.apiBase();
+          const base = providerDef.apiBase();
           const r = await fetch(`${base}/api/tags`, { signal: AbortSignal.timeout(5000) });
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          if (!r.ok) return { ok: false, message: `❌ Ollama HTTP ${r.status}` };
           return { ok: true, message: `✅ Ollama 已连接，版本 OK` };
         }
 
-        // 其余 Provider 用实际 API 调用测试
+        // 其他 Provider：必须先有 API Key
         const key = await this.getAPIKey(p);
-        if (PROVIDERS[p].requiresKey && !key) throw new Error('需要先填写 API Key');
+        if (!key) {
+          return { ok: false, message: `⚠️ 需要配置 ${providerDef.name} 的 API Key` };
+        }
+
+        // 实际测试 API 调用
+        const model = this.getModel(p);
+        const req = providerDef.buildRequest(model, [{ role: 'user', content: 'Hi' }]);
+        if (!req) return { ok: false, message: `❌ 无法构建请求` };
 
         const headers = typeof req.headers === 'function' ? req.headers(key) : req.headers;
         const body = typeof req.body === 'function' ? req.body(model, [{ role: 'user', content: 'Hi' }]) : req.body;
@@ -549,11 +555,11 @@ ${question}
 
         if (!r.ok) {
           const txt = await r.text().catch(() => '');
-          throw new Error(`HTTP ${r.status}: ${txt.slice(0, 100)}`);
+          return { ok: false, message: `❌ API 错误 ${r.status}` };
         }
-        return { ok: true, message: `✅ ${PROVIDERS[p].name} 连接成功` };
+        return { ok: true, message: `✅ ${providerDef.name} 连接成功` };
       } catch (e) {
-        return { ok: false, message: `❌ 连接失败: ${e.message}` };
+        return { ok: false, message: `❌ ${e.message}` };
       }
     },
 

@@ -217,65 +217,58 @@
 
   // ==================== 操作处理器（可一键应用） ====================
   const ActionHandlers = {
+    // ✅ Agent核心：直接创建项目并跳转
     createProject() {
+      // 直接创建项目
+      const id = 'p_' + Date.now();
+      const projectName = '新短剧项目 ' + new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+      const projects = safeJSON(localStorage.getItem('projects') || '[]', []);
+      projects.unshift({
+        id,
+        name: projectName,
+        outline: '',
+        script: '',
+        storyboard: [],
+        characters: [],
+        scenes: [],
+        beats: [],
+        metadata: { createdAt: new Date().toISOString(), createdVersion: (window.UpdateManager && UpdateManager.currentVersion) || '3.1.0' },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      localStorage.setItem('projects', JSON.stringify(projects));
+      localStorage.setItem('currentProjectId', id);
+      showToast('✨ 项目已创建：' + projectName, 'success');
+      
+      // 直接跳转到大纲页
+      setTimeout(() => {
+        switchTab('outline');
+      }, 300);
+      
       return {
-        title: '✨ 新建一个短剧项目',
-        body: '点击下方按钮即可快速创建一个新的短剧项目，之后我会陪你一起生成大纲与分镜。',
-        buttons: [
-          {
-            label: '🚀 立即新建项目',
-            primary: true,
-            action: () => {
-              // 尝试触发项目管理器的新建流程（如果存在），否则手动创建
-              if (typeof window.openProjectModal === 'function') {
-                window.openProjectModal();
-              } else if (typeof window.PM !== 'undefined' && typeof window.PM.openCreateModal === 'function') {
-                window.PM.openCreateModal();
-              } else {
-                // 兜底：直接建一个项目
-                const id = 'p_' + Date.now();
-                const projects = safeJSON(localStorage.getItem('projects') || '[]', []);
-                projects.unshift({
-                  id,
-                  name: '新项目 ' + new Date().toLocaleDateString(),
-                  outline: '',
-                  script: '',
-                  storyboard: [],
-                  characters: [],
-                  scenes: [],
-                  beats: [],
-                  metadata: { createdAt: new Date().toISOString(), createdVersion: (window.UpdateManager && UpdateManager.currentVersion) || '3.1.0' },
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
-                });
-                localStorage.setItem('projects', JSON.stringify(projects));
-                localStorage.setItem('currentProjectId', id);
-                showToast('✨ 新项目已创建', 'success');
-                setTimeout(() => location.reload(), 600);
-              }
-            }
-          }
-        ]
+        title: '✅ 项目已创建',
+        body: `「${projectName}」已创建完成，正在跳转到大纲设计页...`,
+        buttons: []
       };
     },
 
+    // ✅ Agent核心：直接打开项目
     listProjects(ctx) {
       const ps = ctx.projects || [];
       if (!ps.length) {
-        return { title: '📋 项目列表', body: '目前还没有项目，点击下方按钮创建第一个吧。', buttons: [{ label: '✨ 新建项目', primary: true, action: () => ActionHandlers.createProject().buttons[0].action() }] };
+        // 无项目时，直接创建
+        return this.createProject();
       }
-      const items = ps.slice(0, 8).map((p) => {
-        const at = p.updatedAt || p.createdAt || '-';
-        const date = new Date(at).toLocaleDateString();
-        return `<li style="padding:6px 0;border-bottom:1px dashed var(--border);">
-            <strong>${escapeHtml(p.name || '未命名')}</strong>
-            <span style="color:var(--text-dim);font-size:12px;"> · ${date}${p.metadata && p.metadata.createdVersion ? ' · v' + p.metadata.createdVersion : ''}</span>
-            <div style="color:var(--text-dim);font-size:12px;margin-top:2px;">${(p.outline || '暂无大纲').slice(0, 60)}${(p.outline || '').length > 60 ? '...' : ''}</div>
-        </li>`;
-      }).join('');
+      
+      // 直接打开第一个项目
+      const first = ps[0];
+      localStorage.setItem('currentProjectId', first.id);
+      showToast('📂 已打开：' + first.name, 'success');
+      setTimeout(() => switchTab('outline'), 300);
+      
       return {
-        title: `📋 共 ${ps.length} 个项目（最近 8 个）`,
-        body: `<ul style="margin:0;padding-left:18px;">${items}</ul>`,
+        title: `📋 共 ${ps.length} 个项目`,
+        body: `正在打开「${escapeHtml(first.name)}」...`,
         buttons: []
       };
     },
@@ -348,46 +341,88 @@
       };
     },
 
-    generateOutline(ctx) {
+    // ✅ Agent核心：直接用AI生成大纲
+    async generateOutline(ctx) {
       const p = ctx.currentProject;
-      if (!p) return { title: '🧭 生成大纲', body: '请先选择或创建一个项目。', buttons: [{ label: '✨ 新建项目', primary: true, action: () => ActionHandlers.createProject().buttons[0].action() }] };
-      return {
-        title: '🧭 为《' + escapeHtml(p.name) + '》生成大纲',
-        body: '大纲是短剧的骨架：<br>· 30 秒钩子（开场吸引）<br>· 人物关系与冲突<br>· 1-3 个关键反转<br>· 结尾情感落点<br><br>下方按钮会跳转到大纲页，点击"AI 生成"即可填充。',
-        buttons: [
-          { label: '📑 跳转到大纲页', primary: true, action: () => switchTab('outline') },
-          { label: '🔎 去素材库找模板', action: () => switchTab('material') }
-        ]
-      };
+      if (!p) { this.createProject(); return { title: '🧭 创建项目中...', body: '稍候自动生成大纲', buttons: [] }; }
+
+      switchTab('outline');
+      if (!window.LLMManager) return { title: '⚠️ AI未安装', body: '无法生成', buttons: [] };
+
+      showToast('🤖 正在生成大纲...', 'info');
+      try {
+        const result = await LLMManager.sendMessage(
+          `为以下项目生成完整大纲：\n1.30秒开场钩子\n2.人物关系与冲突\n3.2-3个反转\n4.情感落点\n\n项目：${p.name}\n现有：${p.outline || '暂无'}`,
+          { taskType: 'outline_generate', maxTokens: 2000 }
+        );
+        
+        // 填入表单
+        const el = document.getElementById('outline-main') || document.getElementById('outline-content');
+        if (el) { el.value = result; el.dispatchEvent(new Event('input', { bubbles: true })); }
+        
+        // 保存
+        p.outline = result; p.updatedAt = new Date().toISOString();
+        const ps = safeJSON(localStorage.getItem('projects') || '[]', []);
+        const idx = ps.findIndex(x => x.id === p.id);
+        if (idx !== -1) ps[idx] = p;
+        localStorage.setItem('projects', JSON.stringify(ps));
+        
+        showToast('✅ 大纲已生成！', 'success');
+        return { title: '✅ 大纲已生成', body: '已填入表单，请查看！', buttons: [] };
+      } catch (e) { return { title: '⚠️ 失败', body: e.message, buttons: [] }; }
     },
 
-    generateScript(ctx) {
+    // ✅ Agent核心：直接用AI生成剧本
+    async generateScript(ctx) {
       const p = ctx.currentProject;
-      if (!p) return { title: '📖 生成剧本', body: '请先选择或创建一个项目。', buttons: [{ label: '✨ 新建项目', primary: true, action: () => ActionHandlers.createProject().buttons[0].action() }] };
-      return {
-        title: '📖 为《' + escapeHtml(p.name) + '》生成剧本文本',
-        body: '剧本在大纲之后创作，建议顺序：<br>1️⃣ 先完善大纲<br>2️⃣ 再用"AI 生成剧本"<br><br>点击下方跳转到剧本页即可开始。',
-        buttons: [{ label: '📑 跳转到剧本页', primary: true, action: () => switchTab('script') }]
-      };
+      if (!p) { this.createProject(); return { title: '📖 创建项目中...', body: '', buttons: [] }; }
+
+      switchTab('script');
+      if (!window.LLMManager) return { title: '⚠️ AI未安装', body: '无法生成', buttons: [] };
+
+      showToast('🤖 正在生成剧本...', 'info');
+      try {
+        const result = await LLMManager.sendMessage(
+          `基于大纲生成剧本：\n${p.outline || '暂无大纲'}`,
+          { taskType: 'script_generate', maxTokens: 3000 }
+        );
+        
+        const el = document.getElementById('script-content') || document.getElementById('script-main');
+        if (el) { el.value = result; el.dispatchEvent(new Event('input', { bubbles: true })); }
+        
+        p.script = result; p.updatedAt = new Date().toISOString();
+        const ps = safeJSON(localStorage.getItem('projects') || '[]', []);
+        const idx = ps.findIndex(x => x.id === p.id);
+        if (idx !== -1) ps[idx] = p;
+        localStorage.setItem('projects', JSON.stringify(ps));
+        
+        showToast('✅ 剧本已生成！', 'success');
+        return { title: '✅ 剧本已生成', body: '已填入表单！', buttons: [] };
+      } catch (e) { return { title: '⚠️ 失败', body: e.message, buttons: [] }; }
     },
 
-    addStoryboard(ctx) {
+    // ✅ Agent核心：直接用AI添加分镜
+    async addStoryboard(ctx) {
       const p = ctx.currentProject;
-      if (!p) return { title: '🎬 添加分镜', body: '请先选择一个项目。', buttons: [{ label: '✨ 新建项目', primary: true, action: () => ActionHandlers.createProject().buttons[0].action() }] };
-      return {
-        title: '🎬 为《' + escapeHtml(p.name) + '》添加分镜',
-        body: '分镜包含：镜别、场景、人物、运镜、AI 图像提示词。<br>建议每 30 秒 3-5 个镜头。',
-        buttons: [{ label: '🎬 跳转到分镜页', primary: true, action: () => switchTab('storyboard') }]
-      };
+      if (!p) { this.createProject(); return { title: '🎬 创建项目中...', body: '', buttons: [] }; }
+
+      switchTab('storyboard');
+      if (!window.LLMManager) return { title: '⚠️ AI未安装', body: '无法生成', buttons: [] };
+
+      showToast('🤖 正在生成新分镜...', 'info');
+      try {
+        const result = await LLMManager.sendMessage(
+          `基于剧本生成新分镜（镜号/场景/镜头/动作/对白/AI提示词）：\n${(p.script || p.outline || '').slice(0, 1000)}`,
+          { taskType: 'storyboard_generate', maxTokens: 1500 }
+        );
+        showToast('✅ 新分镜已生成！', 'success');
+        return { title: '✅ 分镜已生成', body: result, buttons: [] };
+      } catch (e) { return { title: '⚠️ 失败', body: e.message, buttons: [] }; }
     },
 
-    openBeatSheet() {
-      return { title: '🥁 节拍表/节奏设计', body: '节拍表用于规划故事节奏：救猫咪 15 节拍 / 三段式 / 四幕 结构。', buttons: [{ label: '🥁 打开节拍表', primary: true, action: () => switchTab('beat') }] };
-    },
-
-    openCharacterLib() {
-      return { title: '🧑‍🎤 角色库', body: '角色库帮助你沉淀可复用的主角、配角、反派人设。', buttons: [{ label: '🧑‍🎤 打开角色库', primary: true, action: () => switchTab('character') }] };
-    },
+    // ✅ Agent核心：直接跳转
+    openBeatSheet() { switchTab('beat'); return { title: '🥁 已打开节拍表', body: '', buttons: [] }; },
+    openCharacterLib() { switchTab('character'); return { title: '🧑‍🎤 已打开角色库', body: '', buttons: [] }; },
 
     openSceneLib() {
       return { title: '🏞️ 场景库', body: '场景库帮助你沉淀可复用的场景设定（时间、地点、氛围、光线）。', buttons: [{ label: '🏞️ 打开场景库', primary: true, action: () => switchTab('scene') }] };
@@ -792,55 +827,78 @@
       this.pushUser(text);
       this.render();
 
-      // 识别意图
+      // 识别意图并处理
       setTimeout(async () => {
         const ctx = collectContext();
         const match = matchIntent(text);
-        if (!match) {
-          // 未知输入 → 尝试交给 LLM
-          await this._tryLLM(text, ctx);
-          return;
+        
+        if (match) {
+          // 找到匹配的意图 → 直接执行
+          try {
+            const result = match.pattern.handler(ctx, text);
+            this.pushBot(result || { 
+              title: match.pattern.icon + ' ' + match.pattern.label, 
+              body: '已处理完成！', 
+              buttons: [] 
+            });
+            return;
+          } catch (err) {
+            console.error(err);
+            this.pushBot({ 
+              title: '⚠️ 操作失败', 
+              body: '错误：' + escapeHtml(err.message), 
+              buttons: [] 
+            });
+            return;
+          }
         }
 
-        // 内容生成类意图 → 优先交给 LLM
-        const llmTasks = ['outline_generate', 'script_generate', 'storyboard_add', 'ai_suggest', 'llm_chat'];
-        const needsLLM = llmTasks.includes(match.key) || match.key === 'fallback_search';
-
-        if (needsLLM) {
-          const llmResult = await this._tryLLM(text, ctx, match.key);
-          if (llmResult) return; // LLM 已处理
-        }
-
-        // 降级：离线模式
-        try {
-          const result = match.pattern.handler(ctx, text);
-          this.pushBot(result || { title: match.pattern.icon + ' ' + match.pattern.label, body: '已处理。', buttons: [] });
-        } catch (err) {
-          console.error(err);
-          this.pushBot({ title: '⚠️ 出错了', body: '错误信息：' + escapeHtml(err.message), buttons: [] });
-        }
+        // 没有匹配意图 → 尝试LLM增强
+        await this._tryLLM(text, ctx);
       }, 100);
     },
 
     // 尝试调用 LLM，返回 true 表示已处理
     async _tryLLM(text, ctx, taskType) {
-      // 检查 LLM 是否可用
-      if (!window.LLMManager) return false;
-      const cfg = LLMManager.getConfig();
-      if (!cfg.enabled) return false;
+      // 显示"正在思考"，让用户知道助手在工作
+      const thinkingId = Date.now();
+      this._messages.push({ 
+        role: 'bot', 
+        payload: { 
+          title: '🤔 正在分析…', 
+          body: '让我看看能怎么帮您…', 
+          buttons: [] 
+        }, 
+        t: thinkingId 
+      });
+      this.render();
 
-      // 先尝试连接测试
-      const test = await LLMManager.testConnection().catch(() => ({ ok: false }));
-      if (!test.ok) {
-        // LLM 不可用，给出引导
-        this.pushBot({
-          title: '🤖 AI 大模型未连接',
-          body: '要使用 AI 生成功能，请先配置大模型连接。',
-          buttons: [
-            { label: '⚙️ 打开 AI 设置', primary: true, action: () => { if (window.LLMManager) LLMManager.showSettings(); } },
-            { label: '🧹 继续离线模式', action: () => {} }
-          ]
-        });
+      // 检查 LLM 是否可用
+      let llmAvailable = false;
+      if (window.LLMManager) {
+        try {
+          const cfg = LLMManager.getConfig();
+          if (cfg && cfg.enabled) {
+            const test = await LLMManager.testConnection().catch(() => ({ ok: false }));
+            llmAvailable = test && test.ok;
+          }
+        } catch (e) {}
+      }
+
+      if (!llmAvailable) {
+        // LLM 不可用 → 提供离线帮助
+        const suggestions = this._getOfflineHelp(text, ctx);
+        const idx = this._messages.findIndex(m => m.t === thinkingId);
+        if (idx !== -1) {
+          this._messages[idx].payload = {
+            title: '💡 我可以帮您做这些：',
+            body: suggestions,
+            buttons: [
+              { label: '⚙️ 配置 AI（可选）', primary: true, action: () => { if (window.LLMManager) LLMManager.showSettings(); } }
+            ]
+          };
+        }
+        this.render();
         return true;
       }
 
