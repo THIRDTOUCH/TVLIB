@@ -795,15 +795,38 @@
       }
 
       if (!llmAvailable) {
-        // LLM 不可用 → 提供离线帮助
-        const suggestions = this._getOfflineHelp(text, ctx);
+        // LLM 不可用 → 识别意图并执行离线操作
+        const match = matchIntent(text);
+        if (match) {
+          const idx = this._messages.findIndex(m => m.t === thinkingId);
+          if (idx !== -1) {
+            try {
+              const result = match.pattern.handler(ctx, text);
+              this._messages[idx].payload = {
+                title: result.title || '✅ 完成',
+                body: result.body || '操作已完成',
+                buttons: result.buttons || []
+              };
+            } catch (err) {
+              this._messages[idx].payload = {
+                title: '⚠️ 出错了',
+                body: err.message,
+                buttons: []
+              };
+            }
+          }
+          this.render();
+          return true;
+        }
+        
+        // 没有匹配意图，显示帮助
         const idx = this._messages.findIndex(m => m.t === thinkingId);
         if (idx !== -1) {
           this._messages[idx].payload = {
-            title: '💡 我可以帮您做这些：',
-            body: suggestions,
+            title: '💡 我可以帮您：',
+            body: '✨"新建项目" - 创建新项目\n📋"列出项目" - 查看项目\n⚙️"打开角色库" - 跳转页面\n💾"导出数据" - 备份\n\n(配置AI后可使用更多功能)',
             buttons: [
-              { label: '⚙️ 配置 AI（可选）', primary: true, action: () => { if (window.LLMManager) LLMManager.showSettings(); } }
+              { label: '⚙️ 配置 AI', primary: true, action: () => { if (window.LLMManager) LLMManager.showSettings(); } }
             ]
           };
         }

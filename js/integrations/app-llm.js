@@ -559,7 +559,14 @@ ${question}
         }
         return { ok: true, message: `✅ ${providerDef.name} 连接成功` };
       } catch (e) {
-        return { ok: false, message: `❌ ${e.message}` };
+        // 增强错误提示，特别是CORS问题
+        let msg = e.message || '未知错误';
+        if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
+          msg = '⚠️ CORS错误：Ollama未允许跨域请求\n\n解决方法：\n1. 关闭Ollama\n2. 设置环境变量：OLLAMA_ORIGINS="*"\n3. 重新打开Ollama';
+        } else if (msg.includes('abort')) {
+          msg = '⏰ 连接超时，请检查Ollama是否运行';
+        }
+        return { ok: false, message: `❌ ${msg}` };
       }
     },
 
@@ -639,7 +646,7 @@ ${question}
           throw new Error(`API 错误 ${response.status}: ${errTxt.slice(0, 200)}`);
         }
 
-        // 流式处理
+        // 流式处理 - 支持多种格式
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
@@ -652,31 +659,33 @@ ${question}
           const lines = chunk.split('\n').filter(Boolean);
 
           for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-
-            try {
-              let text = '';
-              let parsed = null;
-
+            // 处理OpenAI/Groq格式: data: {"choices":...}
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6).trim();
+              if (data === '[DONE]') continue;
               try {
-                parsed = JSON.parse(data);
-                text = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text || '';
-              } catch {}
+                const parsed = JSON.parse(data);
+                const text = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text || '';
+                if (text) {
+                  fullText += text;
+                  if (onChunk) onChunk(text, fullText);
+                }
+              } catch { /* 跳过无效行 */ }
+              continue;
+            }
 
-              if (!text && data.startsWith('{')) {
-                try {
-                  parsed = JSON.parse(data);
-                  text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                } catch {}
-              }
-
-              if (text) {
-                fullText += text;
-                if (onChunk) onChunk(text, fullText);
-              }
-            } catch { /* 跳过无效行 */ }
+            // 处理Ollama格式: {"message":{"content":"..."}}
+            if (line.startsWith('{')) {
+              try {
+                const parsed = JSON.parse(line);
+                // Ollama格式：message.content
+                const text = parsed.message?.content || parsed.response || '';
+                if (text) {
+                  fullText += text;
+                  if (onChunk) onChunk(text, fullText);
+                }
+              } catch { /* 跳过无效行 */ }
+            }
           }
         }
 
